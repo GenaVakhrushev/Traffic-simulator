@@ -22,7 +22,9 @@ public class RoadEditor : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonUp(0))
+        //проверка на нажатие на UI
+        bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+        if (Input.GetMouseButtonUp(0) && !isOverUI)
         {
             if (isBuilding)
                 BuildRoad();
