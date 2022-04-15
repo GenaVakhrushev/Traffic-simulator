@@ -109,7 +109,7 @@ public class CameraController : MonoBehaviour
     }
 
     //перемещение камеры к стандартной позиции
-    IEnumerator ToTopView()
+    public IEnumerator ToTopView()
     {
         bool correctTransform = false;
         bool correctRotation = false;
