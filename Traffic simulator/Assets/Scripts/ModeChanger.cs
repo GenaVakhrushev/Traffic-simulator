@@ -9,7 +9,9 @@ public class ModeChanger : MonoBehaviour
     public RoadEditor RoadEditor;
     public TerrainEditor TerrainEditor;
 
+    public GameObject RoadEditorPanel;
     public GameObject TerrainModePanel;
+
     public InputField BrushSizeField;
     public InputField BrushSpeedField;
 
@@ -34,6 +36,8 @@ public class ModeChanger : MonoBehaviour
     public void SetViewMode()
     {
         RoadEditor.enabled = false;
+        RoadEditorPanel.SetActive(false);
+
         TerrainEditor.enabled = false;
         TerrainEditor.terrainMaterial.SetFloat("_IsActive", 0);
         TerrainModePanel.SetActive(false);
@@ -42,6 +46,8 @@ public class ModeChanger : MonoBehaviour
     public void SetRoadEditorMode()
     {
         RoadEditor.enabled = true;
+        RoadEditorPanel.SetActive(true);
+
         TerrainEditor.enabled = false;
         TerrainEditor.terrainMaterial.SetFloat("_IsActive", 0);
         TerrainModePanel.SetActive(false);
@@ -50,6 +56,8 @@ public class ModeChanger : MonoBehaviour
     public void SetTerrainEditor()
     {
         RoadEditor.enabled = false;
+        RoadEditorPanel.SetActive(false);
+
         TerrainEditor.enabled = true;
         TerrainEditor.terrainMaterial.SetFloat("_IsActive", 1);
 
