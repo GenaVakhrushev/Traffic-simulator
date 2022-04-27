@@ -6,9 +6,12 @@ public class Road : MonoBehaviour, ISaveable
 {
     public Path path;
 
+    RoadDisplaing roadDisplaing;
+
     void Awake()
     {
         path = new Path(transform.position);
+        roadDisplaing = GetComponentInChildren<RoadDisplaing>();
     }
 
     #region For saving
@@ -20,7 +23,6 @@ public class Road : MonoBehaviour, ISaveable
         Path newPath = new Path(roadInfo.Points, roadInfo.IsClosed, roadInfo.AutoSetControlPoints);
         path = newPath;
         
-        RoadDisplaing roadDisplaing = GetComponentInChildren<RoadDisplaing>();
         roadDisplaing.UpdatePoints();
         roadDisplaing.HidePoints();
     }

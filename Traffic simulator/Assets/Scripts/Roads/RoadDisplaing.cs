@@ -19,7 +19,7 @@ public class RoadDisplaing : MonoBehaviour
     int selectedSegmentIndex = -1;
     int dotsOnSegmentCount = 50;
 
-    float roadWidth = 1;
+    float roadWidth = 2;
     [Range(0.1f, 1.5f)]
     public float spacing = 0.1f;
     public float tiling = 7;
@@ -182,10 +182,13 @@ public class RoadDisplaing : MonoBehaviour
 
     public void SetDisplayControlPoints(bool value)
     {
-        for (int i = 0; i < pointsObjects.Count; i++)
+        if (value)
         {
-            if (i % 3 != 0)
-                pointsObjects[i].SetActive(value);
+            ShowPoints();
+        }
+        else
+        {
+            HidePoints();
         }
     }
 
@@ -303,11 +306,23 @@ public class RoadDisplaing : MonoBehaviour
         selectedSegmentIndex = -1;
     }
 
+    public void HidePoint(int pointIndex)
+    {
+        pointsObjects[pointIndex].SetActive(false);
+    }
+
+    public void ShowPoint(int pointIndex)
+    {
+        if (pointIndex % 3 == 0 || RoadEditorSettings.displayControlPoints)
+            pointsObjects[pointIndex].SetActive(true);
+    }
+
+
     public void HidePoints()
     {
-        foreach (GameObject point in pointsObjects)
+        for (int i = 0; i < pointsObjects.Count; i++)
         {
-            point.SetActive(false);
+            HidePoint(i);
         }
     }
 
@@ -315,8 +330,7 @@ public class RoadDisplaing : MonoBehaviour
     {
         for (int i = 0; i < pointsObjects.Count; i++)
         {
-            if (i % 3 == 0 || RoadEditorSettings.displayControlPoints)
-                pointsObjects[i].SetActive(true);
+            ShowPoint(i);
         }
     }
 }

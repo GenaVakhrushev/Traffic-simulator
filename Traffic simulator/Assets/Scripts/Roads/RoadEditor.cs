@@ -18,6 +18,8 @@ public class RoadEditor : MonoBehaviour
     int currentSelectedSegmentIndex = -1;
     Vector3 segmentHitPoint;
 
+    float snapRadius = 0.5f;
+
     private void Update()
     {
         //проверка на нажатие на UI
@@ -196,8 +198,41 @@ public class RoadEditor : MonoBehaviour
             newPosition = Camera.main.ScreenToWorldPoint(mousePosition);
         }
 
-        currentRoad.path.MovePoint(currentPointIndex, newPosition);
+        //привязывать можно только крайние точки
+        if (currentPointIndex == 0 || currentPointIndex == currentRoad.path.NumPoints - 1)
+        {
+            Collider[] snapPoints = Physics.OverlapSphere(newPosition, snapRadius, LayerMask.GetMask("Snap point"));
 
+            //если приблизились к точке привязки, то ставим точку в ближайшую точку привязки и отключаем контрольную точку для неё
+            if (snapPoints.Length > 0)
+            {
+                float minDist = float.MaxValue;
+                int closestPointIndex = -1;
+                for (int i = 0; i < snapPoints.Length; i++)
+                {
+                    float dist = Vector3.Distance(newPosition, snapPoints[i].transform.position);
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        closestPointIndex = i;
+                    }
+                }
+                newPosition = snapPoints[closestPointIndex].transform.position;
+
+                Vector3 controlPointDir = newPosition - snapPoints[closestPointIndex].transform.parent.position;
+
+                currentRoad.path.ConnectStartOrEndPoint(currentPointIndex, newPosition, controlPointDir);
+            }
+            else
+            {
+                currentRoad.path.DisconnectStartOrEndPoint(currentPointIndex);
+                currentRoad.path.MovePoint(currentPointIndex, newPosition);
+            }
+        }
+        else
+        {
+            currentRoad.path.MovePoint(currentPointIndex, newPosition);
+        }
         currentRoadDisplaing.UpdatePoints();
     }
 

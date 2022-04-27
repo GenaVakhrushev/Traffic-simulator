@@ -8,6 +8,12 @@ public class Path
     bool isClosed;
     bool autoSetControlPoints;
 
+    bool startConnected = false;
+    bool endConnected = false;
+
+    Vector3 startControlPointDir;
+    Vector3 endControlPointDir;
+
     public int NumPoints => points.Count;
     public int NumSegments => points.Count / 3;
 
@@ -164,38 +170,80 @@ public class Path
 
         if (i % 3 == 0 || !autoSetControlPoints)
         {
-            points[i] = pos;
-
-            if (autoSetControlPoints)
+            if (i == 1 && startConnected)
             {
-                AutoSetAllAffectedControlPoint(i);
-                return;
+                points[i] = points[0] + Vector3.Project(pos - points[0], startControlPointDir);
             }
-
-            //при передвижении якорной точки соответсвенно двигать контрольные точки
-            if (i % 3 == 0)
+            else if (i == NumPoints - 2 && endConnected)
             {
-                if (i + 1 < points.Count || isClosed)
-                    points[LoopIndex(i + 1)] += deltaMove;
-                if (i - 1 >= 0 || isClosed)
-                    points[LoopIndex(i - 1)] += deltaMove;
+                points[i] = points[NumPoints - 1] + Vector3.Project(pos - points[NumPoints - 1], endControlPointDir);
             }
             else
             {
-                bool nextPointIsAnchor = (i + 1) % 3 == 0;
-                int correspondingControlIndex = nextPointIsAnchor ? i + 2 : i - 2;
-                int anchorIndex = nextPointIsAnchor ? i + 1 : i - 1;
+                points[i] = pos;
 
-                //поворачивать контрольную точку напротив двигаемой, чтобы она оставаль напротив, сохраняя её расстояние до якорной точки
-                if (correspondingControlIndex >= 0 && correspondingControlIndex < points.Count || isClosed)
+                if (autoSetControlPoints)
                 {
-                    anchorIndex = LoopIndex(anchorIndex);
-                    correspondingControlIndex = LoopIndex(correspondingControlIndex);
-                    float dist = (points[anchorIndex] - points[correspondingControlIndex]).magnitude;
-                    Vector3 dir = (points[anchorIndex] - pos).normalized;
-                    points[correspondingControlIndex] = points[anchorIndex] + dir * dist;
+                    AutoSetAllAffectedControlPoint(i);
+                    return;
+                }
+
+                //при передвижении якорной точки соответсвенно двигать контрольные точки
+                if (i % 3 == 0)
+                {
+                    if (i + 1 < points.Count || isClosed)
+                        points[LoopIndex(i + 1)] += deltaMove;
+                    if (i - 1 >= 0 || isClosed)
+                        points[LoopIndex(i - 1)] += deltaMove;
+                }
+                else
+                {
+                    bool nextPointIsAnchor = (i + 1) % 3 == 0;
+                    int correspondingControlIndex = nextPointIsAnchor ? i + 2 : i - 2;
+                    int anchorIndex = nextPointIsAnchor ? i + 1 : i - 1;
+
+                    //поворачивать контрольную точку напротив двигаемой, чтобы она оставаль напротив, сохраняя её расстояние до якорной точки
+                    if (correspondingControlIndex >= 0 && correspondingControlIndex < points.Count || isClosed)
+                    {
+                        anchorIndex = LoopIndex(anchorIndex);
+                        correspondingControlIndex = LoopIndex(correspondingControlIndex);
+                        float dist = (points[anchorIndex] - points[correspondingControlIndex]).magnitude;
+                        Vector3 dir = (points[anchorIndex] - pos).normalized;
+                        points[correspondingControlIndex] = points[anchorIndex] + dir * dist;
+                    }
                 }
             }
+        }
+    }
+
+    public void ConnectStartOrEndPoint(int pointIndex, Vector3 pos, Vector3 controlPointDir)
+    {
+        MovePoint(pointIndex, pos);
+        if (pointIndex == 0)
+        {
+            startConnected = true;
+            startControlPointDir = controlPointDir;
+            MovePoint(1, pos + controlPointDir.normalized * 5f);
+        }
+        else
+        {
+            endConnected = true;
+            endControlPointDir = controlPointDir;
+            MovePoint(pointIndex - 1, pos + controlPointDir.normalized * 5f);
+        }
+    }
+
+    public void DisconnectStartOrEndPoint(int pointIndex)
+    {
+        if (pointIndex == 0)
+        {
+            startConnected = false;
+            startControlPointDir = Vector3.zero;
+        }
+        else
+        {
+            endConnected = false;
+            endControlPointDir = Vector3.zero;
         }
     }
 
