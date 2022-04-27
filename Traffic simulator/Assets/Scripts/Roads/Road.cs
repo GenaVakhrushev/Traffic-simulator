@@ -12,14 +12,22 @@ public class Road : MonoBehaviour, ISaveable
     }
 
     #region For saving
+    public PrefabType Prefab => PrefabType.Road;
+
     public void LoadInfo(byte[] info)
     {
+        RoadInfo roadInfo = Helper.ByteArrayToObject(info) as RoadInfo;
+        Path newPath = new Path(roadInfo.Points, roadInfo.IsClosed, roadInfo.AutoSetControlPoints);
+        path = newPath;
         
+        RoadDisplaing roadDisplaing = GetComponentInChildren<RoadDisplaing>();
+        roadDisplaing.UpdatePoints();
+        roadDisplaing.HidePoints();
     }
 
     public byte[] SaveInfo()
     {
-        return null;
+        return Helper.ObjectToByteArray(new RoadInfo(path));
     }
     #endregion
 }
@@ -28,23 +36,38 @@ public class Road : MonoBehaviour, ISaveable
 [System.Serializable]
 public class RoadInfo
 {
-    float[] pos = new float[3];
-    float[] rot = new float[3];
+    //path info
+    float[,] points;
+    bool isClosed;
+    bool autoSetControlPoints;
 
-    public Vector3 Position { get { return new Vector3(pos[0], pos[1], pos[2]); } }
-    public Vector3 Rotation { get { return new Vector3(rot[0], rot[1], rot[2]); } }
-    public float Length;
-
-    public RoadInfo(Vector3 pos, Vector3 rot, float len)
+    public Vector3[] Points
     {
-        this.pos[0] = pos.x;
-        this.pos[1] = pos.y;
-        this.pos[2] = pos.z;
+        get
+        {
+            Vector3[] result = new Vector3[points.GetLength(0)];
+            for (int i = 0; i < points.GetLength(0); i++)
+            {
+                result[i] = new Vector3(points[i, 0], points[i, 1], points[i, 2]);
+            }
+            return result;
+        }
+    }
 
-        this.rot[0] = rot.x;
-        this.rot[1] = rot.y;
-        this.rot[2] = rot.z;
+    public bool IsClosed => isClosed;
+    public bool AutoSetControlPoints => autoSetControlPoints;
 
-        Length = len;
+    public RoadInfo(Path path)
+    {
+        points = new float[path.NumPoints, 3];
+        for (int i = 0; i < path.NumPoints; i++)
+        {
+            points[i, 0] = path[i].x;
+            points[i, 1] = path[i].y;
+            points[i, 2] = path[i].z;
+        }
+
+        isClosed = path.IsClosed;
+        autoSetControlPoints = path.AutoSetControlPoints;
     }
 }

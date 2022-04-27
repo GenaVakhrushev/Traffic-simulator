@@ -10,7 +10,7 @@ public class RoadDisplaing : MonoBehaviour
 {
     public Material ZTestMaterial;
 
-    Road road;
+    public Road road;
     Path path => road.path;
 
     List<GameObject> pointsObjects;
@@ -28,13 +28,12 @@ public class RoadDisplaing : MonoBehaviour
     MeshRenderer meshRenderer;
     MeshCollider meshCollider;
 
-    private void Start()
+    private void Awake()
     {
         ZTestMaterial.color = RoadEditorSettings.segmentCol;
 
         pointsObjects = new List<GameObject>();
         linesFromPoints = new List<LineRenderer>();
-        road = transform.parent.GetComponent<Road>();
 
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
@@ -45,7 +44,7 @@ public class RoadDisplaing : MonoBehaviour
 
     public void UpdatePoints()
     {
-        for (int i = 0; i < path.NumPoint; i++)
+        for (int i = 0; i < path.NumPoints; i++)
         {
             //если точка не создана, то создать её
             if (i >= pointsObjects.Count)
@@ -273,7 +272,7 @@ public class RoadDisplaing : MonoBehaviour
         int minIndex1 = -1;
         int minIndex2 = -1;
 
-        for (int i = 0; i < path.NumPoint; i+=3)
+        for (int i = 0; i < path.NumPoints; i+=3)
         {
             float dist = Vector3.Distance(path[i], pos);
             if (dist < minDist1)

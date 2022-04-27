@@ -91,6 +91,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ZTestMaterial: {fileID: 2100000, guid: 7c3179a638ec1e544a30944117c003f3, type: 2}
+  road: {fileID: 7779932808787903038}
   spacing: 0.1
   tiling: 7
 --- !u!33 &4739857178914893054

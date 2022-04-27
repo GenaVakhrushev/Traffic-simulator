@@ -30,6 +30,9 @@ public class MyTerrain : MonoBehaviour, ISaveable
         terrain.terrainData.SetHeights(0, 0, heights);
     }
 
+    #region For saving
+    public PrefabType Prefab { get => PrefabType.Terrain;  }
+
     public byte[] SaveInfo()
     {
         return Helper.ObjectToByteArray(terrain.terrainData.GetHeights(0, 0, hmWidth, hmHeight));
@@ -40,4 +43,5 @@ public class MyTerrain : MonoBehaviour, ISaveable
         float[,] heights = Helper.ByteArrayToObject(info) as float[,];
         Terrain.activeTerrain.terrainData.SetHeights(0, 0, heights);
     }
+    #endregion
 }

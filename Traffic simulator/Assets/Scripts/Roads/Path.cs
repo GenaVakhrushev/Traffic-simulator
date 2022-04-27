@@ -8,7 +8,7 @@ public class Path
     bool isClosed;
     bool autoSetControlPoints;
 
-    public int NumPoint => points.Count;
+    public int NumPoints => points.Count;
     public int NumSegments => points.Count / 3;
 
     public bool IsClosed
@@ -75,6 +75,13 @@ public class Path
             center + (Vector3.right + Vector3.back) * 0.5f * scale,
             center + Vector3.right * scale
         };
+    }
+
+    public Path(Vector3[] points, bool isClosed, bool autoSetControlPoints)
+    {
+        this.points = new List<Vector3>(points); ;
+        this.isClosed = isClosed;
+        this.autoSetControlPoints = autoSetControlPoints;
     }
 
     public Vector3 this[int i]

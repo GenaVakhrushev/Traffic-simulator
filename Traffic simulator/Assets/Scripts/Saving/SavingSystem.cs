@@ -22,7 +22,7 @@ public class SavingSystem : MonoBehaviour
         //сохраняем тип объекта и данные о нём
         foreach (ISaveable saveable in saveables)
         {
-            saveData.objects.Add(new ObjectInfo { type = saveable.GetType(), info = saveable.SaveInfo() });
+            saveData.objects.Add(new ObjectInfo {prefabType = saveable.Prefab, type = saveable.GetType(), info = saveable.SaveInfo() });
         }
             
         formatter.Serialize(stream, saveData);
@@ -45,8 +45,23 @@ public class SavingSystem : MonoBehaviour
             //для каждого сорхранённого объекта(на сцене) создаём объект(экземпляр класса) и загружаем данные
             foreach(ObjectInfo objectInfo in saveData.objects)
             {
-                object obj = Activator.CreateInstance(objectInfo.type);
-                ((ISaveable)obj).LoadInfo(objectInfo.info);
+                bool needToDestroy = false;
+                GameObject savedObject;
+                GameObject prefab = Prefabs.GetPrefabByType(objectInfo.prefabType);
+                if(prefab != null)
+                {
+                    savedObject = Instantiate(prefab);
+                }
+                else
+                {
+                    savedObject = new GameObject();
+                    savedObject.AddComponent(objectInfo.type);
+                    needToDestroy = true;
+                }
+                //object obj = Activator.CreateInstance(objectInfo.type);
+                savedObject.GetComponent<ISaveable>().LoadInfo(objectInfo.info);
+                if (needToDestroy)
+                    Destroy(savedObject);
             }
         }
         else
@@ -66,6 +81,7 @@ public class SaveData
 [System.Serializable]
 public class ObjectInfo
 {
+    public PrefabType prefabType;
     public Type type;
     public byte[] info;
 }
