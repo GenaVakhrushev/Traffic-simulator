@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Path
 {
+    public Vector3[] CachedEvenlySpacedPoints;
+
     List<Vector3> points;
     bool isClosed;
     bool autoSetControlPoints;
@@ -216,8 +218,25 @@ public class Path
         }
     }
 
-    public void ConnectStartOrEndPoint(int pointIndex, Vector3 pos, Vector3 controlPointDir)
+    public bool ConnectStartOrEndPoint(int pointIndex, Vector3 pos, Vector3 controlPointDir)
     {
+        //при одном сегменте  нельзя соединять оба конца дороги к одной точке
+        if (NumSegments == 1 && (pointIndex == 0 && pos == points[NumPoints - 1] || pointIndex == NumPoints - 1 && pos == points[0]))
+            return false;
+
+        controlPointDir.Normalize();
+
+        Ray ray = new Ray(pos, -controlPointDir);
+        RaycastHit hit;
+        float rayDist = pointIndex == 0 ? Vector3.Distance(pos, points[NumPoints - 1]) : Vector3.Distance(pos, points[0]);
+        if (Physics.Raycast(ray, out hit, rayDist, LayerMask.GetMask("Snap point")))
+        {
+            //при одном сегменте нельзя соединять концы дороги к противополжным точкам одного перекрёстка точке
+            if (NumSegments == 1 && (pointIndex == 0 && hit.transform.position == points[NumPoints - 1] || pointIndex == NumPoints - 1 && hit.transform.position == points[0]))
+                return false;
+        }
+
+
         MovePoint(pointIndex, pos);
         if (pointIndex == 0)
         {
@@ -231,6 +250,8 @@ public class Path
             endControlPointDir = controlPointDir;
             MovePoint(pointIndex - 1, pos + controlPointDir.normalized * 5f);
         }
+
+        return true;
     }
 
     public void DisconnectStartOrEndPoint(int pointIndex)
@@ -288,8 +309,8 @@ public class Path
                 previousPoint = pointOnCurve;
             }
         }
-
-        return evenlySpacedPoints.ToArray();
+        CachedEvenlySpacedPoints = evenlySpacedPoints.ToArray();
+        return CachedEvenlySpacedPoints;
     }
 
     void AutoSetAllAffectedControlPoint(int updateAnchorIndex)

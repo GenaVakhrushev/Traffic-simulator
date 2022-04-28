@@ -217,11 +217,13 @@ public class RoadEditor : MonoBehaviour
                         closestPointIndex = i;
                     }
                 }
-                newPosition = snapPoints[closestPointIndex].transform.position;
+                Vector3 snapPosition = snapPoints[closestPointIndex].transform.position;
+                Vector3 controlPointDir = snapPosition - snapPoints[closestPointIndex].transform.parent.position;
 
-                Vector3 controlPointDir = newPosition - snapPoints[closestPointIndex].transform.parent.position;
-
-                currentRoad.path.ConnectStartOrEndPoint(currentPointIndex, newPosition, controlPointDir);
+                if(!currentRoad.path.ConnectStartOrEndPoint(currentPointIndex, snapPosition, controlPointDir))
+                {
+                    currentRoad.path.MovePoint(currentPointIndex, newPosition);
+                }
             }
             else
             {

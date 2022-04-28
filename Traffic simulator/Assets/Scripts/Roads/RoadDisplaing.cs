@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -58,8 +59,11 @@ public class RoadDisplaing : MonoBehaviour
         }
 
         DrawLines();
+        UpdateMesh();        
+    }
 
-        //создание меша
+    private void UpdateMesh()
+    {
         Vector3[] points = path.CalculateEvenlySpacedPoints(spacing);
         meshFilter.mesh = CreateRoadMesh(points, path.IsClosed);
 
@@ -182,13 +186,10 @@ public class RoadDisplaing : MonoBehaviour
 
     public void SetDisplayControlPoints(bool value)
     {
-        if (value)
+        for (int i = 0; i < pointsObjects.Count; i++)
         {
-            ShowPoints();
-        }
-        else
-        {
-            HidePoints();
+            if (i % 3 != 0)
+                pointsObjects[i].SetActive(value);
         }
     }
 
