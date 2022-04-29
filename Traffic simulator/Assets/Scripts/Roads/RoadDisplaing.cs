@@ -174,14 +174,18 @@ public class RoadDisplaing : MonoBehaviour
         linesFromPoints.RemoveRange(startIndex, count);
     }
 
-    public void SetIsOpen(bool value)
+    public bool SetIsOpen(bool value)
     {
+        if (path.IsStartOrEndConnected && value)
+            return false;
+
         if(!value)
         {
             DeleteObjects(pointsObjects.Count - 2, 2);
         }
 
         UpdatePoints();
+        return true;
     }
 
     public void SetDisplayControlPoints(bool value)

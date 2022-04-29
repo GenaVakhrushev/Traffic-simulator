@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class RoadEditor : MonoBehaviour
 {
-    public GameObject RoadPrefab;
     public Toggle AutoSetControlPointsToggle;
     public GameObject RoadSettingsPanel;
 
@@ -20,21 +19,36 @@ public class RoadEditor : MonoBehaviour
 
     float snapRadius = 0.5f;
 
+    GameObject currentCrossroad = null;
+
     private void Update()
     {
         //проверка на нажатие на UI
         bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
 
         if (Input.GetMouseButtonDown(0) && !isOverUI && !Input.GetKey(KeyCode.LeftShift))
         {
             SelectRoad();
+            bool hitCrossroad = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Crossroad"));
+            if (hitCrossroad)
+            {
+                UnselectPreviousRoad();
+                SelectCrossroad(hit.transform.gameObject);
+            }
+        }
+
+        if (currentCrossroad)
+            MoveCrossroad();
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            ReleaseCrossroad();
         }
 
         if (!currentRoad)
             return;
-
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
 
         //выделение сегмента
         bool hitRoad = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Road"));
@@ -95,6 +109,21 @@ public class RoadEditor : MonoBehaviour
             MovePoint();
     }
 
+    private void MoveCrossroad()
+    {
+        currentCrossroad.transform.position = PositionForMove();
+    }
+
+    private void ReleaseCrossroad()
+    {
+        currentCrossroad = null;
+    }
+
+    private void SelectCrossroad(GameObject crossroad)
+    {
+        currentCrossroad = crossroad.transform.parent.gameObject;
+    }
+
     private void SelectRoad()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -149,21 +178,33 @@ public class RoadEditor : MonoBehaviour
         }
     }
 
+    Vector3 terrainPointOnScreenCenter
+    {
+        get
+        {
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+            RaycastHit hit;
+            Physics.Raycast(ray, out hit, LayerMask.GetMask("Terrain"));
+            return hit.point;
+        }
+    }
+
     //дорога создаётся в центре экрана
     public void CreateNewRoad()
     {
-        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
-        RaycastHit hit;
-        Physics.Raycast(ray, out hit, LayerMask.GetMask("Terrain"));
-        Vector3 screenCenter = hit.point;
-
         UnselectPreviousRoad();
 
-        currentRoad = Instantiate(RoadPrefab, screenCenter, Quaternion.identity).GetComponent<Road>();
+        currentRoad = Instantiate(Prefabs.singleton.Road, terrainPointOnScreenCenter, Quaternion.identity).GetComponent<Road>();
         currentRoadDisplaing = currentRoad.GetComponentInChildren<RoadDisplaing>();
 
         RoadSettingsPanel.SetActive(true);
         FillRoadSettings();
+    }
+
+    public void CreateNewCrossroad()
+    {
+        UnselectPreviousRoad();
+        Instantiate(Prefabs.singleton.Crossroad, terrainPointOnScreenCenter, Quaternion.identity);
     }
 
     private void SelectPoint(GameObject gameObject)
@@ -181,22 +222,7 @@ public class RoadEditor : MonoBehaviour
 
     private void MovePoint()
     {
-        Vector3 newPosition;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        bool hitTerraint = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Terrain"));
-
-        //передвигать точки по земле, если нет земли, то в плоскости камеры
-        if (hitTerraint)
-        {
-            newPosition = hit.point;
-        }
-        else
-        {
-            float mouseZ = Camera.main.WorldToScreenPoint(currentPoint.transform.position).z;
-            Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, mouseZ);
-            newPosition = Camera.main.ScreenToWorldPoint(mousePosition);
-        }
+        Vector3 newPosition = PositionForMove();
 
         //привязывать можно только крайние точки
         if (currentPointIndex == 0 || currentPointIndex == currentRoad.path.NumPoints - 1)
@@ -238,6 +264,27 @@ public class RoadEditor : MonoBehaviour
         currentRoadDisplaing.UpdatePoints();
     }
 
+    Vector3 PositionForMove()
+    {
+        Vector3 newPosition;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        bool hitTerraint = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Terrain"));
+
+        //передвигать точки по земле, если нет земли, то в плоскости камеры
+        if (hitTerraint)
+        {
+            newPosition = hit.point;
+        }
+        else
+        {
+            float mouseZ = Camera.main.WorldToScreenPoint(currentPoint.transform.position).z;
+            Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, mouseZ);
+            newPosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        }
+        return newPosition;
+    }
+
     private void AddPoint(Vector3 point)
     {
         currentRoad.path.AddSegment(point);
@@ -263,8 +310,12 @@ public class RoadEditor : MonoBehaviour
 
     public void SetIsClosed(Toggle toggle)
     {
-        currentRoad.path.IsClosed = toggle.isOn;
-        currentRoadDisplaing.SetIsOpen(toggle.isOn);
+        if (currentRoadDisplaing.SetIsOpen(toggle.isOn))
+            currentRoad.path.IsClosed = toggle.isOn;
+        else
+        {
+            toggle.isOn = !toggle.isOn;
+        }
     }
 
     public void SetAutoSetControlPoints(Toggle toggle)

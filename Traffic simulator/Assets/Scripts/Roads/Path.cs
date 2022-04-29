@@ -19,6 +19,8 @@ public class Path
     public int NumPoints => points.Count;
     public int NumSegments => points.Count / 3;
 
+    public bool IsStartOrEndConnected => startConnected || endConnected;
+
     public bool IsClosed
     {
         get
@@ -102,6 +104,11 @@ public class Path
 
     public void AddSegment(Vector3 anchorPos)
     {
+        if (endConnected)
+        {
+            SplitSegment(anchorPos, NumSegments - 1);
+            return;
+        }
         //добавить контрольную точку на том же расстоянии, что и контрольная точка для последней якорной точки, но с другой стороны 
         //p3 + (p3 - p2) = 2 * p3 - p2
         points.Add(2 * points[points.Count - 1] - points[points.Count - 2]);
@@ -337,6 +344,9 @@ public class Path
 
     void AutoSetAnchorControlPoints(int anchorIndex)
     {
+        if (anchorIndex == 0 && startConnected || anchorIndex == NumPoints - 1 && endConnected)
+            return;
+
         Vector3 anchorPos = points[anchorIndex];
         //направление для одной контрольной точки(для другой противоположное)
         Vector3 dir = Vector3.zero;
@@ -374,8 +384,10 @@ public class Path
     {
         if (!isClosed)
         {
-            points[1] = (points[0] + points[2]) / 2;
-            points[points.Count - 2] = (points[points.Count - 1] + points[points.Count - 3]) / 2;
+            if (!startConnected)
+                points[1] = (points[0] + points[2]) / 2;
+            if (!endConnected)
+                points[points.Count - 2] = (points[points.Count - 1] + points[points.Count - 3]) / 2;
         }
     }
 

@@ -7,6 +7,7 @@ public class Prefabs : MonoBehaviour
     public static Prefabs singleton;
 
     public GameObject Road;
+    public GameObject Crossroad;
 
     private void Start()
     {
@@ -17,13 +18,13 @@ public class Prefabs : MonoBehaviour
     {
         switch (type)
         {
-            case PrefabType.Terrain:
-                return null;
             case PrefabType.Road:
                 return singleton.Road;
+            case PrefabType.Crossroad:
+                return singleton.Crossroad;
         }
         return null;
     }
 }
 
-public enum PrefabType {Terrain, Road }
+public enum PrefabType {Terrain, Road, Crossroad }
