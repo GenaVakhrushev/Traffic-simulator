@@ -44,7 +44,7 @@ public class CrossroadPath : MonoBehaviour
             point.position + Vector3.Project(rootPoint.position - point.position, rootPoint.right),
             point.position
         };
-        Path newPath = new Path(points, false, false);
+        Path newPath = new Path(points);
         newPath.CalculateEvenlySpacedPoints(spacing);
         possiplePaths.Add(newPath);
     }
@@ -54,7 +54,7 @@ public class CrossroadPath : MonoBehaviour
         Start();
 
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(rootPoint.position, 0.2f);
+        Gizmos.DrawSphere(rootPoint.position, 0.15f);
 
         Gizmos.color = Color.blue;
         foreach  (Transform pathPoint in pathPoints)

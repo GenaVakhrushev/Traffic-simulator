@@ -18,8 +18,43 @@ public class RoadEditor : MonoBehaviour
     Vector3 segmentHitPoint;
 
     float snapRadius = 0.5f;
+    SnapPoint lastSnapPoint;
 
-    GameObject currentCrossroad = null;
+    Crossroad currentCrossroad = null;
+
+    Vector3 terrainPointOnScreenCenter
+    {
+        get
+        {
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+            RaycastHit hit;
+            Physics.Raycast(ray, out hit, LayerMask.GetMask("Terrain"));
+            return hit.point;
+        }
+    }
+    Vector3 positionForMove
+    {
+        get
+        {
+            Vector3 newPosition;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            bool hitTerraint = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Terrain"));
+
+            //передвигать точки по земле, если нет земли, то в плоскости камеры
+            if (hitTerraint)
+            {
+                newPosition = hit.point;
+            }
+            else
+            {
+                float mouseZ = Camera.main.WorldToScreenPoint(currentPoint.transform.position).z;
+                Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, mouseZ);
+                newPosition = Camera.main.ScreenToWorldPoint(mousePosition);
+            }
+            return newPosition;
+        }
+    }
 
     private void Update()
     {
@@ -28,11 +63,14 @@ public class RoadEditor : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
+        #region Crossroad input
         if (Input.GetMouseButtonDown(0) && !isOverUI && !Input.GetKey(KeyCode.LeftShift))
         {
+            //выделение дороги
             SelectRoad();
-            bool hitCrossroad = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Crossroad"));
-            if (hitCrossroad)
+
+            bool hitCrossroadOrPoint = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Crossroad", "Point"));
+            if (hitCrossroadOrPoint && hit.transform.GetComponentInParent<Crossroad>())
             {
                 UnselectPreviousRoad();
                 SelectCrossroad(hit.transform.gameObject);
@@ -46,6 +84,7 @@ public class RoadEditor : MonoBehaviour
         {
             ReleaseCrossroad();
         }
+        #endregion
 
         if (!currentRoad)
             return;
@@ -109,9 +148,10 @@ public class RoadEditor : MonoBehaviour
             MovePoint();
     }
 
+    #region Crossroad
     private void MoveCrossroad()
     {
-        currentCrossroad.transform.position = PositionForMove();
+        currentCrossroad.MoveCrossroad(positionForMove);
     }
 
     private void ReleaseCrossroad()
@@ -121,9 +161,17 @@ public class RoadEditor : MonoBehaviour
 
     private void SelectCrossroad(GameObject crossroad)
     {
-        currentCrossroad = crossroad.transform.parent.gameObject;
+        currentCrossroad = crossroad.GetComponentInParent<Crossroad>();
     }
 
+    public void CreateNewCrossroad()
+    {
+        UnselectPreviousRoad();
+        Instantiate(Prefabs.singleton.Crossroad, terrainPointOnScreenCenter, Quaternion.identity);
+    }
+    #endregion
+
+    #region Road
     private void SelectRoad()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -178,17 +226,6 @@ public class RoadEditor : MonoBehaviour
         }
     }
 
-    Vector3 terrainPointOnScreenCenter
-    {
-        get
-        {
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
-            RaycastHit hit;
-            Physics.Raycast(ray, out hit, LayerMask.GetMask("Terrain"));
-            return hit.point;
-        }
-    }
-
     //дорога создаётся в центре экрана
     public void CreateNewRoad()
     {
@@ -200,13 +237,9 @@ public class RoadEditor : MonoBehaviour
         RoadSettingsPanel.SetActive(true);
         FillRoadSettings();
     }
+    #endregion
 
-    public void CreateNewCrossroad()
-    {
-        UnselectPreviousRoad();
-        Instantiate(Prefabs.singleton.Crossroad, terrainPointOnScreenCenter, Quaternion.identity);
-    }
-
+    #region Points
     private void SelectPoint(GameObject gameObject)
     {
         currentPoint = gameObject;
@@ -222,7 +255,7 @@ public class RoadEditor : MonoBehaviour
 
     private void MovePoint()
     {
-        Vector3 newPosition = PositionForMove();
+        Vector3 newPosition = positionForMove;
 
         //привязывать можно только крайние точки
         if (currentPointIndex == 0 || currentPointIndex == currentRoad.path.NumPoints - 1)
@@ -246,14 +279,34 @@ public class RoadEditor : MonoBehaviour
                 Vector3 snapPosition = snapPoints[closestPointIndex].transform.position;
                 Vector3 controlPointDir = snapPosition - snapPoints[closestPointIndex].transform.parent.position;
 
-                if(!currentRoad.path.ConnectStartOrEndPoint(currentPointIndex, snapPosition, controlPointDir))
+                if (currentRoad.path.ConnectStartOrEndPoint(currentPointIndex, snapPosition, controlPointDir))
+                {
+                    lastSnapPoint = snapPoints[closestPointIndex].GetComponent<SnapPoint>();
+                    currentRoad.ConnectToSnapPoint(lastSnapPoint, currentPointIndex == 0);
+                }
+                else
                 {
                     currentRoad.path.MovePoint(currentPointIndex, newPosition);
                 }
             }
             else
             {
-                currentRoad.path.DisconnectStartOrEndPoint(currentPointIndex);
+                bool needDisconnectStart = currentRoad.path.StartConnected && currentPointIndex == 0;
+                bool needDisconnectEnd = currentRoad.path.EndConnected && currentPointIndex == currentRoad.path.NumPoints - 1;
+
+                if (needDisconnectStart)
+                {
+                    currentRoad.DisconnectSnapPoint(true);
+                }else if (needDisconnectEnd)
+                {
+                    currentRoad.DisconnectSnapPoint(false);
+                }
+                
+                if (needDisconnectStart || needDisconnectEnd)
+                {
+                    currentRoad.path.DisconnectStartOrEndPoint(currentPointIndex);
+                }
+                
                 currentRoad.path.MovePoint(currentPointIndex, newPosition);
             }
         }
@@ -262,27 +315,6 @@ public class RoadEditor : MonoBehaviour
             currentRoad.path.MovePoint(currentPointIndex, newPosition);
         }
         currentRoadDisplaing.UpdatePoints();
-    }
-
-    Vector3 PositionForMove()
-    {
-        Vector3 newPosition;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        bool hitTerraint = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Terrain"));
-
-        //передвигать точки по земле, если нет земли, то в плоскости камеры
-        if (hitTerraint)
-        {
-            newPosition = hit.point;
-        }
-        else
-        {
-            float mouseZ = Camera.main.WorldToScreenPoint(currentPoint.transform.position).z;
-            Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, mouseZ);
-            newPosition = Camera.main.ScreenToWorldPoint(mousePosition);
-        }
-        return newPosition;
     }
 
     private void AddPoint(Vector3 point)
@@ -302,16 +334,23 @@ public class RoadEditor : MonoBehaviour
         }
     }
 
+
     void SplitRoad(Vector3 point)
     {
         currentRoad.path.SplitSegment(point, currentSelectedSegmentIndex);
         currentRoadDisplaing.UpdatePoints();
     }
 
+    #endregion
+
+    #region Settings
     public void SetIsClosed(Toggle toggle)
     {
         if (currentRoadDisplaing.SetIsOpen(toggle.isOn))
+        {
             currentRoad.path.IsClosed = toggle.isOn;
+            currentRoadDisplaing.UpdatePoints();
+        }
         else
         {
             toggle.isOn = !toggle.isOn;
@@ -335,4 +374,5 @@ public class RoadEditor : MonoBehaviour
         if (currentRoad != null)
             currentRoadDisplaing.SetDisplayControlPoints(toggle.isOn);
     }
+    #endregion
 }

@@ -2,6 +2,67 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class PathInfo
+{
+    float[,] points;
+    bool isClosed;
+    bool autoSetControlPoints;
+
+    bool startConnected;
+    bool endConnected;
+
+    float[] startControlPointDir = new float[3];
+    float[] endControlPointDir = new float[3];
+
+    public bool StartConnected => startConnected;
+    public bool EndConnected => endConnected;
+
+    public Vector3 StartControlPointDir => new Vector3(startControlPointDir[0], startControlPointDir[1], startControlPointDir[2]);
+    public Vector3 EndControlPointDir => new Vector3(endControlPointDir[0], endControlPointDir[1], endControlPointDir[2]);
+
+    public Vector3[] Points
+    {
+        get
+        {
+            Vector3[] result = new Vector3[points.GetLength(0)];
+            for (int i = 0; i < points.GetLength(0); i++)
+            {
+                result[i] = new Vector3(points[i, 0], points[i, 1], points[i, 2]);
+            }
+            return result;
+        }
+    }
+
+    public bool IsClosed => isClosed;
+    public bool AutoSetControlPoints => autoSetControlPoints;
+
+    public PathInfo(Path path)
+    {
+        points = new float[path.NumPoints, 3];
+        for (int i = 0; i < path.NumPoints; i++)
+        {
+            points[i, 0] = path[i].x;
+            points[i, 1] = path[i].y;
+            points[i, 2] = path[i].z;
+        }
+
+        isClosed = path.IsClosed;
+        autoSetControlPoints = path.AutoSetControlPoints;
+
+        startConnected = path.StartConnected;
+        endConnected = path.EndConnected;
+
+        startControlPointDir[0] = path.StartControlPointDir.x;
+        startControlPointDir[1] = path.StartControlPointDir.y;
+        startControlPointDir[2] = path.StartControlPointDir.z;
+
+        endControlPointDir[0] = path.EndControlPointDir.x;
+        endControlPointDir[1] = path.EndControlPointDir.y;
+        endControlPointDir[2] = path.EndControlPointDir.z;
+    }
+}
+
 public class Path
 {
     public Vector3[] CachedEvenlySpacedPoints;
@@ -18,8 +79,12 @@ public class Path
 
     public int NumPoints => points.Count;
     public int NumSegments => points.Count / 3;
-
+    public bool StartConnected => startConnected;
+    public bool EndConnected => endConnected;
     public bool IsStartOrEndConnected => startConnected || endConnected;
+
+    public Vector3 StartControlPointDir => startControlPointDir;
+    public Vector3 EndControlPointDir => endControlPointDir;
 
     public bool IsClosed
     {
@@ -87,11 +152,22 @@ public class Path
         };
     }
 
-    public Path(Vector3[] points, bool isClosed, bool autoSetControlPoints)
+    public Path(Vector3[] pathPoints)
     {
-        this.points = new List<Vector3>(points); ;
-        this.isClosed = isClosed;
-        this.autoSetControlPoints = autoSetControlPoints;
+        points = new List<Vector3>(pathPoints);
+    }
+
+    public Path(PathInfo pathInfo)
+    {
+        points = new List<Vector3>(pathInfo.Points); 
+        isClosed = pathInfo.IsClosed;
+        autoSetControlPoints = pathInfo.AutoSetControlPoints;
+
+        startConnected = pathInfo.StartConnected;
+        endConnected = pathInfo.EndConnected;
+
+        startControlPointDir = pathInfo.StartControlPointDir;
+        endControlPointDir = pathInfo.EndControlPointDir;
     }
 
     public Vector3 this[int i]
