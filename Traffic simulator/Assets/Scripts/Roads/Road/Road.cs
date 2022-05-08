@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Road : MonoBehaviour, ISaveable
+public class Road : MonoBehaviour, ISaveable, IPathable
 {
     public Path path;
 
@@ -26,10 +26,12 @@ public class Road : MonoBehaviour, ISaveable
         if(startConnecting)
         {
             startSnapPoint = snapPoint;
+            roadDisplaing.StartCarSpawner.gameObject.SetActive(false);
         }
         else
         {
             endSnapPoint = snapPoint;
+            roadDisplaing.EndCarSpawner.gameObject.SetActive(false);
         }
         snapPoint.ConnectRoad(this, startConnecting);
     }
@@ -40,11 +42,37 @@ public class Road : MonoBehaviour, ISaveable
         {
             startSnapPoint.DisconnectRoad();
             startSnapPoint = null;
+            roadDisplaing.StartCarSpawner.gameObject.SetActive(true);
         }
         else
         {
             endSnapPoint.DisconnectRoad();
             endSnapPoint = null;
+            roadDisplaing.EndCarSpawner.gameObject.SetActive(true);
+        }
+    }
+
+    public Path GetPath(Car car)
+    {
+        return path;
+    }
+    public IPathable GetNextPathable(Car car)
+    {
+        if (car.fromStartToEnd)
+        {
+            car.fromStartToEnd = true;
+            if (endSnapPoint)
+                return endSnapPoint.crossroadPath;
+            else
+                return null;
+        }
+        else
+        {
+            car.fromStartToEnd = true;
+            if (startSnapPoint)
+                return startSnapPoint.crossroadPath;
+            else
+                return null;
         }
     }
 

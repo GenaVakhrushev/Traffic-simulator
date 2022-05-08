@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class CameraController : MonoBehaviour
 {
-    public Text modeText;
-
     private bool isFree = false;
 
     [SerializeField]
@@ -95,16 +93,12 @@ public class CameraController : MonoBehaviour
             StopAllCoroutines();
 
             Cursor.lockState = CursorLockMode.Locked;
-
-            modeText.text = "от первого лица";
         }
         else
         {
             StartCoroutine(ToTopView());
 
             Cursor.lockState = CursorLockMode.None;
-
-            modeText.text = "вид сверху";
         }
     }
 

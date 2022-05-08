@@ -4,14 +4,29 @@ using UnityEngine;
 
 public class Prefabs : MonoBehaviour
 {
-    public static Prefabs singleton;
+    static Prefabs instance;
+
+    public static Prefabs Instance
+    {
+        get
+        {
+            if(instance == null)
+            {
+                instance = new Prefabs();
+            }
+
+            return instance;
+        }
+    }
 
     public GameObject Road;
     public GameObject Crossroad;
+    public GameObject CarSpawner;
+    public GameObject Car;
 
     private void Start()
     {
-        singleton = this;
+        instance = this;
     }
 
     public static GameObject GetPrefabByType(PrefabType type)
@@ -19,9 +34,9 @@ public class Prefabs : MonoBehaviour
         switch (type)
         {
             case PrefabType.Road:
-                return singleton.Road;
+                return Instance.Road;
             case PrefabType.Crossroad:
-                return singleton.Crossroad;
+                return Instance.Crossroad;
         }
         return null;
     }

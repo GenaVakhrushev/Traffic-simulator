@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class CrossroadPath : MonoBehaviour
+public class CrossroadPath : MonoBehaviour, IPathable
 {
     List<Path> possiplePaths;
+    List<Car>[] carsByPaths;
 
-    Transform rootPoint;
-    Transform[] pathPoints;
+    Crossroad crossroad;
+    SnapPoint[] snapPoints;
+
+    SnapPoint parentSpanPoint;
 
    float spacing = 0.1f;
 
@@ -16,37 +19,91 @@ public class CrossroadPath : MonoBehaviour
     {
         possiplePaths = new List<Path>();
 
-        AssignPoints();
+        crossroad = GetComponentInParent<Crossroad>();
+        snapPoints = crossroad.GetComponentsInChildren<SnapPoint>();
+        parentSpanPoint = GetComponentInParent<SnapPoint>();
 
-        foreach (Transform pathPoint in pathPoints)
+        for (int i = 0; i < snapPoints.Length; i++)
         {
-            CreatePath(pathPoint);
+            CreatePath(snapPoints[i]);
+        }
+
+        carsByPaths = new List<Car>[possiplePaths.Count];
+        for (int i = 0; i < carsByPaths.Length; i++)
+        {
+            carsByPaths[i] = new List<Car>();
         }
     }
 
-    void AssignPoints()
+    void CreatePath(SnapPoint point)
     {
-        rootPoint = transform.GetChild(0);
-        List<Transform> points = new List<Transform>();
-        foreach (Transform pathPoint in rootPoint)
+        Vector3 snapPointBezierPoint = point.transform.position - point.transform.right * 0.4f;
+        Vector3[] points;
+        if (point != parentSpanPoint)
         {
-            points.Add(pathPoint);
+            points = new Vector3[]
+            {
+                transform.position,
+                transform.position + Vector3.Project(snapPointBezierPoint - transform.position, transform.forward),
+                snapPointBezierPoint + Vector3.Project(transform.position - snapPointBezierPoint, transform.right),
+                snapPointBezierPoint
+            };
         }
-        pathPoints = points.ToArray();
-    }
-
-    void CreatePath(Transform point)
-    {
-        Vector3[] points = new Vector3[]
+        else
         {
-            rootPoint.position,
-            rootPoint.position + Vector3.Project(point.position - rootPoint.position, rootPoint.forward),
-            point.position + Vector3.Project(rootPoint.position - point.position, rootPoint.right),
-            point.position
-        };
+            points = new Vector3[]
+            {
+                transform.position,
+                transform.position + 1.5f * transform.forward,
+                snapPointBezierPoint + 1.5f * transform.forward,
+                snapPointBezierPoint
+            };
+        }
         Path newPath = new Path(points);
         newPath.CalculateEvenlySpacedPoints(spacing);
         possiplePaths.Add(newPath);
+    }
+
+    public Path GetRandomPath()
+    {
+        return possiplePaths[Random.Range(0, possiplePaths.Count)];
+    }
+
+    int GetCarPathIndex(Car car)
+    {
+        for (int i = 0; i < carsByPaths.Length; i++)
+        {
+            if(carsByPaths[i].Contains(car))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public Path GetPath(Car car)
+    {
+        int carPathIndex = GetCarPathIndex(car);
+        if(carPathIndex != -1)
+        {
+            return possiplePaths[carPathIndex];
+        }
+        else
+        {
+            Path newPath = GetRandomPath();
+            int newPathIndex = possiplePaths.IndexOf(newPath);
+            carsByPaths[newPathIndex].Add(car);
+            return newPath;
+        }
+    }
+    public IPathable GetNextPathable(Car car)
+    {
+        int carPathIndex = GetCarPathIndex(car);
+        SnapPoint snapPoint = snapPoints[carPathIndex];
+        car.fromStartToEnd = snapPoint.startOfRoadConnected;
+        carsByPaths[carPathIndex].Remove(car);
+
+        return snapPoint.connectedRoad;
     }
 
     private void OnDrawGizmosSelected()
@@ -54,14 +111,14 @@ public class CrossroadPath : MonoBehaviour
         Start();
 
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(rootPoint.position, 0.15f);
+        Gizmos.DrawSphere(transform.position, 0.15f);
 
         Gizmos.color = Color.blue;
-        foreach  (Transform pathPoint in pathPoints)
+        foreach (SnapPoint snapPoint in snapPoints)
         {
-            Gizmos.DrawSphere(pathPoint.position, 0.1f);
+            Gizmos.DrawSphere(snapPoint.transform.position - snapPoint.transform.right * 0.4f, 0.1f);
         }
-        
+
         foreach (Path path in possiplePaths)
         {
             Handles.DrawBezier(path[0], path[3], path[1], path[2], Color.red, null, 2f);

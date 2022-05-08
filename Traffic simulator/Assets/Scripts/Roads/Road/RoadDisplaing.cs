@@ -29,6 +29,9 @@ public class RoadDisplaing : MonoBehaviour
     MeshRenderer meshRenderer;
     MeshCollider meshCollider;
 
+    public CarSpawner StartCarSpawner { get; private set; }
+    public CarSpawner EndCarSpawner { get; private set; }
+
     private void Awake()
     {
         ZTestMaterial.color = RoadEditorSettings.segmentCol;
@@ -39,6 +42,11 @@ public class RoadDisplaing : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
+
+        StartCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[0], Quaternion.identity, transform).GetComponent<CarSpawner>();
+        StartCarSpawner.onStart = true;
+        EndCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[path.NumPoints - 1], Quaternion.identity, transform).GetComponent<CarSpawner>();
+        EndCarSpawner.onStart = false;
 
         UpdatePoints();
     }
@@ -57,6 +65,9 @@ public class RoadDisplaing : MonoBehaviour
             else
                 pointsObjects[i].transform.position = path[i];
         }
+
+        StartCarSpawner.transform.position = path[0];
+        EndCarSpawner.transform.position = path[path.NumPoints - 1];
 
         DrawLines();
         UpdateMesh();        

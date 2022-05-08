@@ -65,7 +65,22 @@ public class PathInfo
 
 public class Path
 {
-    public Vector3[] CachedEvenlySpacedPoints;
+    public Vector3[] cachedEvenlySpacedPoints;
+    public Vector3[] CachedEvenlySpacedPoints
+    {
+        get
+        {
+            if(cachedEvenlySpacedPoints == null)
+            {
+                CalculateEvenlySpacedPoints(0.1f);
+            }
+            return cachedEvenlySpacedPoints;
+        }
+        set
+        {
+            cachedEvenlySpacedPoints = value;
+        }
+    }
 
     List<Vector3> points;
     bool isClosed;

@@ -167,7 +167,7 @@ public class RoadEditor : MonoBehaviour
     public void CreateNewCrossroad()
     {
         UnselectPreviousRoad();
-        Instantiate(Prefabs.singleton.Crossroad, terrainPointOnScreenCenter, Quaternion.identity);
+        Instantiate(Prefabs.Instance.Crossroad, terrainPointOnScreenCenter, Quaternion.identity);
     }
     #endregion
 
@@ -231,7 +231,7 @@ public class RoadEditor : MonoBehaviour
     {
         UnselectPreviousRoad();
 
-        currentRoad = Instantiate(Prefabs.singleton.Road, terrainPointOnScreenCenter, Quaternion.identity).GetComponent<Road>();
+        currentRoad = Instantiate(Prefabs.Instance.Road, terrainPointOnScreenCenter, Quaternion.identity).GetComponent<Road>();
         currentRoadDisplaing = currentRoad.GetComponentInChildren<RoadDisplaing>();
 
         RoadSettingsPanel.SetActive(true);
