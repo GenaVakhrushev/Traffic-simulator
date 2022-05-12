@@ -36,7 +36,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DrawTexture:
-        m_Texture: {fileID: 2800000, guid: c37fa5b694ca7d24f88f5576615b473d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5f36bc008d939ce4c81828c8b3557395, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -73,7 +73,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Radius: 4
+    - _Radius: 2
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 0
     - _SrcBlend: 1
@@ -84,5 +84,5 @@ Material:
     - _Center: {r: 35.833374, g: 0, b: 30.732422, a: 0}
     - _Color: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Position: {r: -15.162598, g: 0, b: 15.376282, a: 0}
+    - _Position: {r: -26.904297, g: 0, b: 19.742859, a: 0}
   m_BuildTextureStacks: []

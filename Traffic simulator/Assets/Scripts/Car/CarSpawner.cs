@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CarSpawner : MonoBehaviour, IPauseable
 {
-    
     [HideInInspector]
     public bool onStart;
     public float SpawnDeltaTime

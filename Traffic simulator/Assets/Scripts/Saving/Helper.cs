@@ -27,4 +27,11 @@ public static class Helper
             return obj;
         }
     }
+
+    public static void CreateCube(Vector3 pos, float scale = 0.2f)
+    {
+        GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        gameObject.transform.position = pos;
+        gameObject.transform.localScale = new Vector3(scale, scale, scale);
+    }
 }

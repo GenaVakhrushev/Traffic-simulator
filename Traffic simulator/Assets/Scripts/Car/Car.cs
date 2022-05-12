@@ -10,67 +10,114 @@ public class Car : MonoBehaviour, IPauseable
     Path currentPath => currentPathable == null ? null : currentPathable.GetPath(this);
 
     public float Speed = 60f;
+    float moveVectorLen => Speed * Time.deltaTime * 0.02f;
 
     float roadComplitionPercent = 0;
+    int nextPointIndex;
+    Vector3 nextPoint => currentPath.CachedEvenlySpacedPoints[nextPointIndex] + RightOffset(nextPointIndex);
 
     bool canMove = true;
     private void Start()
     {
         GameStateManager.OnGameStateChanged.AddListener(OnGameStateChanged);
+        nextPointIndex = CalculateNextPointIndex(fromStartToEnd ? 0 : currentPath.CachedEvenlySpacedPoints.Length - 1, moveVectorLen);
     }
-    
+
     private void FixedUpdate()
     {
         if (!canMove)
             return;
 
-        float moveVectorLen = Speed * Time.deltaTime * 0.02f;
-
         int currentPathIndex = (int)(currentPath.CachedEvenlySpacedPoints.Length * roadComplitionPercent);
 
         if (!fromStartToEnd)
         {
-            currentPathIndex = currentPath.CachedEvenlySpacedPoints.Length - currentPathIndex;
+            currentPathIndex = currentPath.CachedEvenlySpacedPoints.Length - 1 - currentPathIndex;
         }
 
-        Vector3 moveVector;
-        float distToNextPoint;
+        float distToNextPoint = Vector3.Distance(transform.position, nextPoint);
 
-        int i = 1;
-        do
+        if(distToNextPoint < moveVectorLen)
         {
-            int nextPointIndex = currentPathIndex + i * (fromStartToEnd ? 1 : -1);
-
-            if (nextPointIndex < 0 || nextPointIndex >= currentPath.CachedEvenlySpacedPoints.Length)
+            nextPointIndex = CalculateNextPointIndex(currentPathIndex, moveVectorLen);
+            if (nextPointIndex < 0)
             {
-                currentPathable = currentPathable.GetNextPathable(this);
-                
-                if (currentPathable == null)
-                {
-                    Destroy(gameObject);
-                }
-                roadComplitionPercent = 0;
                 return;
             }
+        }
 
-            Vector3 nextPoint = currentPath.CachedEvenlySpacedPoints[nextPointIndex];
-            distToNextPoint = Vector3.Distance(transform.position, nextPoint);
-            moveVector = (nextPoint - transform.position).normalized * moveVectorLen;
-
-            if (fromStartToEnd)
-            {
-                roadComplitionPercent = (float)nextPointIndex / currentPath.CachedEvenlySpacedPoints.Length;
-            }
-            else
-            {
-                roadComplitionPercent = 1 - (float)nextPointIndex / currentPath.CachedEvenlySpacedPoints.Length;
-            }
-            i++;
-        } while (moveVectorLen > distToNextPoint);
-
+        Vector3 moveVector = (nextPoint - transform.position).normalized * moveVectorLen;
+        
         transform.Translate(moveVector, Space.World);
+        transform.LookAt(transform.position + moveVector);         
     }
 
+    Vector3 RightOffset(int pointIndex)
+    {
+        if (currentPathable.GetType() != typeof(Road))
+            return Vector3.zero;
+
+        Vector3 point = currentPath.CachedEvenlySpacedPoints[pointIndex];
+        Vector3 forward = Vector3.zero;
+        if (fromStartToEnd)
+        {
+            if (pointIndex < currentPath.CachedEvenlySpacedPoints.Length - 1)
+            {
+                forward += currentPath.CachedEvenlySpacedPoints[pointIndex + 1] - point;
+            }
+            if (pointIndex > 0)
+            {
+                forward += point - currentPath.CachedEvenlySpacedPoints[pointIndex - 1];
+            }
+        }
+        else
+        {
+            if (pointIndex > 0)
+            {
+                forward += currentPath.CachedEvenlySpacedPoints[pointIndex - 1] - point;
+            }
+            if (pointIndex < currentPath.CachedEvenlySpacedPoints.Length - 1)
+            {
+                forward += point - currentPath.CachedEvenlySpacedPoints[pointIndex + 1];
+            }
+        }
+
+        forward.Normalize();
+        forward *= 0.25f;
+
+        return new Vector3(forward.z, forward.y, -forward.x);
+    }
+
+    int CalculateNextPointIndex(int currentPathIndex, float moveVectorLen)
+    {
+        for(int i = currentPathIndex + (fromStartToEnd ? 1 : -1); ; i += fromStartToEnd ? 1 : -1)
+        {
+            if(i <= -1 || i >= currentPath.CachedEvenlySpacedPoints.Length)
+            {
+                currentPathable = currentPathable.GetNextPathable(this);
+                if(currentPathable == null)
+                {
+                    Destroy(gameObject);
+                    return -1;
+                }
+                roadComplitionPercent = 0; 
+                return CalculateNextPointIndex(fromStartToEnd ? 0 : currentPath.CachedEvenlySpacedPoints.Length - 1, moveVectorLen); ;
+            }
+            if(Vector3.Distance(currentPath.CachedEvenlySpacedPoints[i] + RightOffset(i),transform.position) > moveVectorLen)
+            {
+                if (fromStartToEnd)
+                {
+                    roadComplitionPercent = (float)i / currentPath.CachedEvenlySpacedPoints.Length;
+                }
+                else
+                {
+                    roadComplitionPercent = 1 - (float)i / currentPath.CachedEvenlySpacedPoints.Length;
+                }
+
+                return i;
+            }
+        }
+    }
     public void OnGameStateChanged(GameState gameState)
     {
         canMove = gameState == GameState.Play;

@@ -20,7 +20,7 @@ public class RoadDisplaing : MonoBehaviour
     int selectedSegmentIndex = -1;
     int dotsOnSegmentCount = 50;
 
-    float roadWidth = 2;
+    public static float roadWidth = 2;
     [Range(0.1f, 1.5f)]
     public float spacing = 0.1f;
     public float tiling = 7;
@@ -66,8 +66,14 @@ public class RoadDisplaing : MonoBehaviour
                 pointsObjects[i].transform.position = path[i];
         }
 
-        StartCarSpawner.transform.position = path[0];
-        EndCarSpawner.transform.position = path[path.NumPoints - 1];
+        Vector3 startForward = (path[1] - path[0]).normalized;
+        Vector3 endForward = (path[path.NumPoints - 1] - path[path.NumPoints - 2]).normalized;
+
+        Vector3 startRightOffset = new Vector3(startForward.z, startForward.y, -startForward.x) * roadWidth / 4f;
+        Vector3 endRightOffset = new Vector3(-endForward.z, endForward.y, endForward.x) * roadWidth / 4f;
+
+        StartCarSpawner.transform.position = path[0] + startRightOffset;
+        EndCarSpawner.transform.position = path[path.NumPoints - 1] + endRightOffset;
 
         DrawLines();
         UpdateMesh();        

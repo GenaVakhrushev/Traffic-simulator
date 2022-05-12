@@ -2539,6 +2539,7 @@ MonoBehaviour:
   TerrainEditor: {fileID: 534669908}
   RoadEditorPanel: {fileID: 0}
   TerrainModePanel: {fileID: 809463954}
+  PlayPausePanel: {fileID: 0}
   BrushSizeField: {fileID: 0}
   BrushSpeedField: {fileID: 0}
 --- !u!114 &809463957
@@ -2729,7 +2730,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 997377711}
         m_TargetAssemblyTypeName: ModeChanger, Assembly-CSharp
-        m_MethodName: SetTerrainEditor
+        m_MethodName: SetTerrainEditorMode
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3211,6 +3212,7 @@ MonoBehaviour:
   TerrainEditor: {fileID: 534669908}
   RoadEditorPanel: {fileID: 0}
   TerrainModePanel: {fileID: 972740005}
+  PlayPausePanel: {fileID: 0}
   BrushSizeField: {fileID: 466123057}
   BrushSpeedField: {fileID: 219973904}
 --- !u!114 &972740008
@@ -3444,6 +3446,7 @@ MonoBehaviour:
   TerrainEditor: {fileID: 534669908}
   RoadEditorPanel: {fileID: 972740005}
   TerrainModePanel: {fileID: 809463954}
+  PlayPausePanel: {fileID: 424214620}
   BrushSizeField: {fileID: 466123057}
   BrushSpeedField: {fileID: 219973904}
 --- !u!1 &1056855727
@@ -3831,9 +3834,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 264a755f38cd44541abaedfbccd26c44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnGameStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1223335090
 GameObject:
   m_ObjectHideFlags: 0
@@ -5946,72 +5946,3 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2124090129}
   m_CullTransparentMesh: 1
---- !u!1001 &3928927794034020152
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3928927793435997085, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_Name
-      value: Crossroad
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 3.56
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.44
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928927793435997086, guid: 05cc681424f521e4c972bbc8884f12b4,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 05cc681424f521e4c972bbc8884f12b4, type: 3}

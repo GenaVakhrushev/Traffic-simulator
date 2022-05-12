@@ -65,7 +65,7 @@ public class PathInfo
 
 public class Path
 {
-    public Vector3[] cachedEvenlySpacedPoints;
+    Vector3[] cachedEvenlySpacedPoints;
     public Vector3[] CachedEvenlySpacedPoints
     {
         get
