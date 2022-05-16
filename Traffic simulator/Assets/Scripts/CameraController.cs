@@ -22,6 +22,31 @@ public class CameraController : MonoBehaviour
     private float xRotation = 60f;
     private float yRotation = 0f;
 
+    Clickable currentClickable;
+
+    void Update()
+    {
+        bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+        if (!isOverUI && Input.GetMouseButtonUp(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            Physics.Raycast(ray, out hit);
+            Clickable clickable = hit.transform.GetComponentInParent<Clickable>();
+
+            if (clickable)
+            {
+                clickable.OnClick();
+                currentClickable = clickable;
+            }
+            else if(currentClickable)
+            {
+                currentClickable.panel.HidePanel();
+            }
+        }
+    }
+
     private void FixedUpdate()
     {
         Move();

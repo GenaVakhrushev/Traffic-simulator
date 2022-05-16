@@ -311,6 +311,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   crossroadPath: {fileID: 0}
   connectedRoad: {fileID: 0}
+  startOfRoadConnected: 0
 --- !u!1 &3928927794160846595
 GameObject:
   m_ObjectHideFlags: 0
@@ -371,6 +372,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   crossroadPath: {fileID: 0}
   connectedRoad: {fileID: 0}
+  startOfRoadConnected: 0
 --- !u!1 &3928927794433747382
 GameObject:
   m_ObjectHideFlags: 0
@@ -431,6 +433,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   crossroadPath: {fileID: 0}
   connectedRoad: {fileID: 0}
+  startOfRoadConnected: 0
 --- !u!1 &3928927795044398854
 GameObject:
   m_ObjectHideFlags: 0
@@ -587,3 +590,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   crossroadPath: {fileID: 0}
   connectedRoad: {fileID: 0}
+  startOfRoadConnected: 0

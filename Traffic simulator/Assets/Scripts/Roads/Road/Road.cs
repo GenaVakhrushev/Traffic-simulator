@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Road : MonoBehaviour, ISaveable, IPathable
+public class Road : MonoBehaviour, ISaveable, ILaneable
 {
     public Path path;
 
@@ -52,11 +52,11 @@ public class Road : MonoBehaviour, ISaveable, IPathable
         }
     }
 
-    public Path GetPath(Car car)
+    public Path GetLane(Car car)
     {
         return path;
     }
-    public IPathable GetNextPathable(Car car)
+    public ILaneable GetNextLaneable(Car car)
     {
         if (car.fromStartToEnd)
         {

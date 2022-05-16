@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class CrossroadPath : MonoBehaviour, IPathable
+public class CrossroadPath : MonoBehaviour, ILaneable
 {
     List<Path> possiplePaths;
     List<Car>[] carsByPaths;
@@ -96,7 +96,7 @@ public class CrossroadPath : MonoBehaviour, IPathable
             return newPath;
         }
     }
-    public IPathable GetNextPathable(Car car)
+    public ILaneable GetNextLaneable(Car car)
     {
         int carPathIndex = GetCarPathIndex(car);
         SnapPoint snapPoint = snapPoints[carPathIndex];

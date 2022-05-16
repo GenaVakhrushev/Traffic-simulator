@@ -4,8 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum Mode { View, Road, Terrain }
+
 public class ModeChanger : MonoBehaviour
 {
+    public static Mode CurrentMode = Mode.View;
+
     public RoadEditor RoadEditor;
     public TerrainEditor TerrainEditor;
 
@@ -36,6 +40,8 @@ public class ModeChanger : MonoBehaviour
 
     public void SetViewMode()
     {
+        CurrentMode = Mode.View;
+
         RoadEditor.enabled = false;
         RoadEditorPanel.SetActive(false);
 
@@ -48,6 +54,8 @@ public class ModeChanger : MonoBehaviour
 
     public void SetRoadEditorMode()
     {
+        CurrentMode = Mode.Road;
+
         RoadEditor.enabled = true;
         RoadEditorPanel.SetActive(true);
 
@@ -61,6 +69,8 @@ public class ModeChanger : MonoBehaviour
 
     public void SetTerrainEditorMode()
     {
+        CurrentMode = Mode.Terrain;
+
         RoadEditor.enabled = false;
         RoadEditorPanel.SetActive(false);
 

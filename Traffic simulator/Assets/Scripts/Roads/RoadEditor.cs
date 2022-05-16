@@ -262,7 +262,7 @@ public class RoadEditor : MonoBehaviour
         {
             Collider[] snapPoints = Physics.OverlapSphere(newPosition, snapRadius, LayerMask.GetMask("Snap point"));
 
-            //если приблизились к точке привязки, то ставим точку в ближайшую точку привязки и отключаем контрольную точку для неё
+            //если приблизились к точке привязки, то ставим точку в ближайшую точку привязки
             if (snapPoints.Length > 0)
             {
                 float minDist = float.MaxValue;
@@ -279,6 +279,7 @@ public class RoadEditor : MonoBehaviour
                 Vector3 snapPosition = snapPoints[closestPointIndex].transform.position;
                 Vector3 controlPointDir = snapPosition - snapPoints[closestPointIndex].transform.parent.position;
 
+                //если удалось подключить путь, то подключаем дорогу
                 if (currentRoad.path.ConnectStartOrEndPoint(currentPointIndex, snapPosition, controlPointDir))
                 {
                     lastSnapPoint = snapPoints[closestPointIndex].GetComponent<SnapPoint>();

@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class Car : MonoBehaviour, IPauseable
 {
-    public IPathable currentPathable;
+    public ILaneable currentPathable;
+    Path currentPath => currentPathable == null ? null : currentPathable.GetLane(this);
     public bool fromStartToEnd = true;
-
-    Path currentPath => currentPathable == null ? null : currentPathable.GetPath(this);
 
     public float Speed = 60f;
     float moveVectorLen => Speed * Time.deltaTime * 0.02f;
@@ -20,7 +19,7 @@ public class Car : MonoBehaviour, IPauseable
     private void Start()
     {
         GameStateManager.OnGameStateChanged.AddListener(OnGameStateChanged);
-        nextPointIndex = CalculateNextPointIndex(fromStartToEnd ? 0 : currentPath.CachedEvenlySpacedPoints.Length - 1, moveVectorLen);
+        nextPointIndex = CalculateNextPointIndex();
     }
 
     private void FixedUpdate()
@@ -28,18 +27,13 @@ public class Car : MonoBehaviour, IPauseable
         if (!canMove)
             return;
 
-        int currentPathIndex = (int)(currentPath.CachedEvenlySpacedPoints.Length * roadComplitionPercent);
-
-        if (!fromStartToEnd)
-        {
-            currentPathIndex = currentPath.CachedEvenlySpacedPoints.Length - 1 - currentPathIndex;
-        }
-
         float distToNextPoint = Vector3.Distance(transform.position, nextPoint);
 
+        //если машина дошла до следующей точки - определить следующую
         if(distToNextPoint < moveVectorLen)
         {
-            nextPointIndex = CalculateNextPointIndex(currentPathIndex, moveVectorLen);
+            nextPointIndex = CalculateNextPointIndex();
+            //если следующей точки нет, значит машина уничтожена, то есть двигать не надо
             if (nextPointIndex < 0)
             {
                 return;
@@ -52,6 +46,7 @@ public class Car : MonoBehaviour, IPauseable
         transform.LookAt(transform.position + moveVector);         
     }
 
+    //получаем вектор вправо таким же способом как при создании меша
     Vector3 RightOffset(int pointIndex)
     {
         if (currentPathable.GetType() != typeof(Road))
@@ -83,25 +78,33 @@ public class Car : MonoBehaviour, IPauseable
         }
 
         forward.Normalize();
-        forward *= 0.25f;
+        forward *= 0.2f;
 
         return new Vector3(forward.z, forward.y, -forward.x);
     }
 
-    int CalculateNextPointIndex(int currentPathIndex, float moveVectorLen)
+    int CalculateNextPointIndex()
     {
-        for(int i = currentPathIndex + (fromStartToEnd ? 1 : -1); ; i += fromStartToEnd ? 1 : -1)
+        int currentPathIndex = (int)(currentPath.CachedEvenlySpacedPoints.Length * roadComplitionPercent);
+
+        if (!fromStartToEnd)
+        {
+            currentPathIndex = currentPath.CachedEvenlySpacedPoints.Length - 1 - currentPathIndex;
+        }
+        //ищем ближайшую точку, расстояние до которой больше, чем длина вектора перемещения
+        for (int i = currentPathIndex + (fromStartToEnd ? 1 : -1); ; i += fromStartToEnd ? 1 : -1)
         {
             if(i <= -1 || i >= currentPath.CachedEvenlySpacedPoints.Length)
             {
-                currentPathable = currentPathable.GetNextPathable(this);
+                currentPathable = currentPathable.GetNextLaneable(this);
+                //если дальше некуда идти, то уничтожить машину, иначе перейти к следующему участку дороги
                 if(currentPathable == null)
                 {
                     Destroy(gameObject);
                     return -1;
                 }
                 roadComplitionPercent = 0; 
-                return CalculateNextPointIndex(fromStartToEnd ? 0 : currentPath.CachedEvenlySpacedPoints.Length - 1, moveVectorLen); ;
+                return CalculateNextPointIndex(); ;
             }
             if(Vector3.Distance(currentPath.CachedEvenlySpacedPoints[i] + RightOffset(i),transform.position) > moveVectorLen)
             {

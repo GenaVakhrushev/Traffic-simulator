@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CarSpawner : MonoBehaviour, IPauseable
+public enum CarType { Passenger, Truck, Public }
+public enum IntervalType { Fixed, Random }
+
+public class CarSpawner : Clickable, IPauseable
 {
-    [HideInInspector]
-    public bool onStart;
+    public CarType CarType = CarType.Passenger;
+    public IntervalType IntervalType = IntervalType.Fixed;
     public float SpawnDeltaTime
     {
         get
@@ -18,13 +21,38 @@ public class CarSpawner : MonoBehaviour, IPauseable
             StartSpawn();
         }
     }
+    public float IntervalStart;
+    public float IntervalEnd;
+    public bool IsActive
+    {
+        get
+        {
+            return isActive;
+        }
+        set
+        {
+            isActive = value;
+            if (isActive && GameStateManager.CurrentGameState == GameState.Play)
+            {
+                StartSpawn();
+            }
+            else
+            {
+                StopSpawn();
+            }
+        }
+    }
 
     float spawnDeltaTime = 2f;
+    bool isActive = true;
+    [HideInInspector]
+    public bool onStart;
 
     Road road;
 
-    void Start()
+    public override void Start()
     {
+        base.Start();
         road = GetComponentInParent<Road>();
 
         GameStateManager.OnGameStateChanged.AddListener(OnGameStateChanged);
@@ -33,7 +61,7 @@ public class CarSpawner : MonoBehaviour, IPauseable
     public void StartSpawn()
     {
         StopAllCoroutines();
-        if (gameObject.activeSelf)
+        if (gameObject.activeSelf && isActive)
             StartCoroutine(SpawnCar());
     }
 
@@ -47,7 +75,10 @@ public class CarSpawner : MonoBehaviour, IPauseable
         Car newCar = Instantiate(Prefabs.Instance.Car, transform.position, Quaternion.identity).GetComponent<Car>();
         newCar.currentPathable = road;
         newCar.fromStartToEnd = onStart;
-        yield return new WaitForSeconds(SpawnDeltaTime);
+        if (IntervalType == IntervalType.Fixed)
+            yield return new WaitForSeconds(SpawnDeltaTime);
+        else
+            yield return new WaitForSeconds(Random.Range(IntervalStart, IntervalEnd));
         StartCoroutine(SpawnCar());
     }
 

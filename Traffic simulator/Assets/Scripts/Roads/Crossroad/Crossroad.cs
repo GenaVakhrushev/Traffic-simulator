@@ -18,7 +18,7 @@ public class CrossroadInfo
     }
 }
 
-public class Crossroad : MonoBehaviour, ISaveable
+public class Crossroad : Clickable, ISaveable
 {
     SnapPoint[] snapPoints;
 
@@ -29,13 +29,13 @@ public class Crossroad : MonoBehaviour, ISaveable
 
     public void MoveCrossroad(Vector3 positionForMove)
     {
+        //при передвижении перекрёстка двигать подключённые дороги
         transform.position = positionForMove;
         foreach (SnapPoint snapPoint in snapPoints)
         {
             snapPoint.MoveConnectedRoad();
         }
     }
-
     #region For saving
     public PrefabType Prefab => PrefabType.Crossroad;
     public byte[] SaveInfo()

@@ -69,8 +69,8 @@ public class RoadDisplaing : MonoBehaviour
         Vector3 startForward = (path[1] - path[0]).normalized;
         Vector3 endForward = (path[path.NumPoints - 1] - path[path.NumPoints - 2]).normalized;
 
-        Vector3 startRightOffset = new Vector3(startForward.z, startForward.y, -startForward.x) * roadWidth / 4f;
-        Vector3 endRightOffset = new Vector3(-endForward.z, endForward.y, endForward.x) * roadWidth / 4f;
+        Vector3 startRightOffset = new Vector3(startForward.z, startForward.y, -startForward.x) * roadWidth * 0.2f;
+        Vector3 endRightOffset = new Vector3(-endForward.z, endForward.y, endForward.x) * roadWidth * 0.2f;
 
         StartCarSpawner.transform.position = path[0] + startRightOffset;
         EndCarSpawner.transform.position = path[path.NumPoints - 1] + endRightOffset;
