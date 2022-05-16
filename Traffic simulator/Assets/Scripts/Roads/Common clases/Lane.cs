@@ -2,21 +2,61 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Lane : MonoBehaviour
+public class Lane
 {
     List<LanePoint> lanePoints;
- 
-    void Start()
+
+    public LanePoint this[int i]
+    {
+        get
+        {
+            return lanePoints[i];
+        }
+    }
+    public int NumPoints => lanePoints.Count;
+
+    public Lane(Path path, bool fromStartToEnd, float offset, float maxSpeed)
     {
         lanePoints = new List<LanePoint>();
-    }
-
-    public void SetLanePoints(Path path, Vector3 offset, float maxSpeed)
-    {
-        foreach (Vector3 point in path.CachedEvenlySpacedPoints)
+        for (int i = 0; i < path.CachedEvenlySpacedPoints.Length; i++)
         {
-            lanePoints.Add(new LanePoint { position = point + offset, maxSpeed = maxSpeed });
+            Vector3 point = path.CachedEvenlySpacedPoints[i];
+            Vector3 right = Vector3.zero;
+            if (offset != 0)
+            {
+                Vector3 forward = Vector3.zero;
+                if (fromStartToEnd)
+                {
+                    if (i < path.CachedEvenlySpacedPoints.Length - 1)
+                    {
+                        forward += path.CachedEvenlySpacedPoints[i + 1] - point;
+                    }
+                    if (i > 0)
+                    {
+                        forward += point - path.CachedEvenlySpacedPoints[i - 1];
+                    }
+                }
+                else
+                {
+                    if (i > 0)
+                    {
+                        forward += path.CachedEvenlySpacedPoints[i - 1] - point;
+                    }
+                    if (i < path.CachedEvenlySpacedPoints.Length - 1)
+                    {
+                        forward += point - path.CachedEvenlySpacedPoints[i + 1];
+                    }
+                }
+
+                forward.Normalize();
+                forward *= offset;
+
+                right = new Vector3(forward.z, forward.y, -forward.x);
+            }
+
+            lanePoints.Add(new LanePoint { position = point + right, maxSpeed = maxSpeed });
         }
+        
     }
 }
 

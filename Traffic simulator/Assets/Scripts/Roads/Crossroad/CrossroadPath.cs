@@ -8,6 +8,8 @@ public class CrossroadPath : MonoBehaviour, ILaneable
     List<Path> possiplePaths;
     List<Car>[] carsByPaths;
 
+    List<Lane> lanes;
+
     Crossroad crossroad;
     SnapPoint[] snapPoints;
 
@@ -18,6 +20,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
     private void Start()
     {
         possiplePaths = new List<Path>();
+        lanes = new List<Lane>();
 
         crossroad = GetComponentInParent<Crossroad>();
         snapPoints = crossroad.GetComponentsInChildren<SnapPoint>();
@@ -62,6 +65,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         Path newPath = new Path(points);
         newPath.CalculateEvenlySpacedPoints(spacing);
         possiplePaths.Add(newPath);
+        lanes.Add(new Lane(newPath, true, 0, 60));
     }
 
     public Path GetRandomPath()
@@ -81,19 +85,19 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         return -1;
     }
 
-    public Path GetPath(Car car)
+    public Lane GetLane(Car car)
     {
         int carPathIndex = GetCarPathIndex(car);
         if(carPathIndex != -1)
         {
-            return possiplePaths[carPathIndex];
+            return lanes[carPathIndex];
         }
         else
         {
             Path newPath = GetRandomPath();
             int newPathIndex = possiplePaths.IndexOf(newPath);
             carsByPaths[newPathIndex].Add(car);
-            return newPath;
+            return lanes[newPathIndex];
         }
     }
     public ILaneable GetNextLaneable(Car car)

@@ -219,6 +219,12 @@ public class RoadEditor : MonoBehaviour
     {
         if (currentRoad != null)
         {
+            currentRoad.startLanes.Clear();
+            currentRoad.endLanes.Clear();
+
+            currentRoad.startLanes.Add(new Lane(currentRoad.path, true, RoadDisplaing.roadWidth * 0.2f, 60));
+            currentRoad.endLanes.Add(new Lane(currentRoad.path, false, -RoadDisplaing.roadWidth * 0.2f, 60));
+
             currentRoad = null;
             currentRoadDisplaing.HidePoints();
 

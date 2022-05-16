@@ -5,6 +5,8 @@ using UnityEngine;
 public class Road : MonoBehaviour, ISaveable, ILaneable
 {
     public Path path;
+    public List<Lane> startLanes;
+    public List<Lane> endLanes;
 
     SnapPoint startSnapPoint = null;
     SnapPoint endSnapPoint = null;
@@ -19,6 +21,11 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
     {
         path = new Path(transform.position);
         roadDisplaing = GetComponentInChildren<RoadDisplaing>();
+
+        startLanes = new List<Lane>();
+        endLanes = new List<Lane>();
+
+        UpdateLanes();
     }
 
     public void ConnectToSnapPoint(SnapPoint snapPoint, bool startConnecting)
@@ -52,9 +59,9 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
         }
     }
 
-    public Path GetLane(Car car)
+    public Lane GetLane(Car car)
     {
-        return path;
+        return car.fromStartToEnd ? startLanes[0] : endLanes[0];
     }
     public ILaneable GetNextLaneable(Car car)
     {
@@ -74,6 +81,15 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
             else
                 return null;
         }
+    }
+
+    void UpdateLanes()
+    {
+        startLanes.Clear();
+        endLanes.Clear();
+
+        startLanes.Add(new Lane(path, true, RoadDisplaing.roadWidth * 0.2f, 60));
+        endLanes.Add(new Lane(path, false, RoadDisplaing.roadWidth * 0.2f, 60));
     }
 
     #region For saving
@@ -96,6 +112,8 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
         {
             StartCoroutine(LoadConnectEnd());
         }
+
+        UpdateLanes();
     }
 
     IEnumerator LoadConnectStart()
