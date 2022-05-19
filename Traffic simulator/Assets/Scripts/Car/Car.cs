@@ -42,7 +42,7 @@ public class Car : MonoBehaviour, IPauseable
         Speed += acceleration;
         if (Speed > currentLane[currentPointIndex].speed)
             Speed = currentLane[currentPointIndex].speed;
-        Debug.Log("2 " + Speed);
+
         currentLane.SetSpeed(Speed, currentPointIndex, 3, !fromStartToEnd);
 
         float distToNextPoint = Vector3.Distance(transform.position, nextPoint);
@@ -68,16 +68,7 @@ public class Car : MonoBehaviour, IPauseable
             {
                 currentLane.SetDefaultConnectSpeedNoBlockChange(!fromStartToEnd);
                 Speed = currentLane[currentPointIndex].speed;
-                Debug.Log("1 " + Speed);
                 needToGiveWay = false;
-                /*if (fromStartToEnd)
-                {
-                    currentLane.EndBlocked = false;
-                }
-                else
-                {
-                    currentLane.StartBlocked = true;
-                }*/
             }            
         }
 

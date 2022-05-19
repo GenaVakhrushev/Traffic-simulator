@@ -5,15 +5,21 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System;
+using UnityEditor;
 
 public class SavingSystem : MonoBehaviour
 {
     //сохранение
     public static void Save()
     {
-        BinaryFormatter formatter = new BinaryFormatter();
-        string path = Application.persistentDataPath + "/testlevel.save";
+        //string path = Application.persistentDataPath + "/testlevel.save";
+        string path = EditorUtility.SaveFilePanel("Выберите путь сохранения", "", "My save", "save");
+        if (path.Length == 0)
+            return;
         FileStream stream = new FileStream(path, FileMode.Create);
+
+        BinaryFormatter formatter = new BinaryFormatter();
+
         SaveData saveData = new SaveData();
 
         //все сохраняемые объекты
@@ -32,7 +38,8 @@ public class SavingSystem : MonoBehaviour
 
     public static void Load()
     {
-        string path = Application.persistentDataPath + "/testlevel.save";
+        //string path = Application.persistentDataPath + "/testlevel.save";
+        string path = EditorUtility.OpenFilePanel("Выберите файл сохранения", "", "save");
         if (File.Exists(path))
         {
             BinaryFormatter formatter = new BinaryFormatter();
