@@ -26,6 +26,9 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
+        if (ModeChanger.CurrentMode != Mode.View)
+            return;
+
         bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
         if (!isOverUI && Input.GetMouseButtonUp(0))
         {

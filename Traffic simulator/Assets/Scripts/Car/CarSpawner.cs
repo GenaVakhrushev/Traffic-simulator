@@ -18,10 +18,13 @@ public class CarSpawner : Clickable, IPauseable
         set
         {
             spawnDeltaTime = value;
-            StartSpawn();
+            if (GameStateManager.CurrentGameState == GameState.Play)
+                StartSpawn();
         }
     }
+    [HideInInspector]
     public float IntervalStart;
+    [HideInInspector]
     public float IntervalEnd;
     public bool IsActive
     {
@@ -43,7 +46,7 @@ public class CarSpawner : Clickable, IPauseable
         }
     }
 
-    float spawnDeltaTime = 2f;
+    float spawnDeltaTime = 4f;
     bool isActive = true;
     [HideInInspector]
     public bool onStart;
@@ -73,8 +76,8 @@ public class CarSpawner : Clickable, IPauseable
     IEnumerator SpawnCar()
     {
         Car newCar = Instantiate(Prefabs.Instance.Car, transform.position, Quaternion.identity).GetComponent<Car>();
-        newCar.currentLaneable = road;
         newCar.fromStartToEnd = onStart;
+        newCar.currentLaneable = road;
         if (IntervalType == IntervalType.Fixed)
             yield return new WaitForSeconds(SpawnDeltaTime);
         else

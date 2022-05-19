@@ -20,9 +20,8 @@ public class RoadDisplaing : MonoBehaviour
     int selectedSegmentIndex = -1;
     int dotsOnSegmentCount = 50;
 
-    public static float roadWidth = 2;
-    [Range(0.1f, 1.5f)]
-    public float spacing = 0.1f;
+    public static float roadWidth = 6;
+    public static float spacing = 0.1f;
     public float tiling = 7;
 
     MeshFilter meshFilter;
@@ -85,6 +84,7 @@ public class RoadDisplaing : MonoBehaviour
         meshFilter.mesh = CreateRoadMesh(points, path.IsClosed);
 
         int textureRepeat = Mathf.RoundToInt(tiling * points.Length * spacing * 0.05f);
+        meshRenderer.sharedMaterial = new Material(meshRenderer.sharedMaterial);
         meshRenderer.sharedMaterial.mainTextureScale = new Vector2(1, textureRepeat);
         meshCollider.sharedMesh = meshFilter.mesh;
     }
@@ -150,7 +150,7 @@ public class RoadDisplaing : MonoBehaviour
     //проверки аналогичны скрипту Path, удал€ютс€ объекты отвечающие за отображение
     public void DeletePoint(int pointIndex)
     {
-        int i = -1;
+        int i;
 
         if (pointIndex == 0)
         {
@@ -214,12 +214,13 @@ public class RoadDisplaing : MonoBehaviour
         }
     }
 
-    Mesh CreateRoadMesh(Vector3[] points, bool isClosed)
+    Mesh CreateRoadMesh(Vector3[] origPoints, bool isClosed)
     {
+        Vector3[] points = new Vector3[origPoints.Length];
         //перевести координаты точек в локальные
         for (int i = 0; i < points.Length; i++)
         {
-            points[i] = transform.InverseTransformPoint(points[i]);
+            points[i] = transform.InverseTransformPoint(origPoints[i]);
         }
 
         Vector3[] verts = new Vector3[points.Length * 2];

@@ -17,7 +17,7 @@ public class RoadEditor : MonoBehaviour
     int currentSelectedSegmentIndex = -1;
     Vector3 segmentHitPoint;
 
-    float snapRadius = 0.5f;
+    float snapRadius = 1.5f;
     SnapPoint lastSnapPoint;
 
     Crossroad currentCrossroad = null;
@@ -60,6 +60,10 @@ public class RoadEditor : MonoBehaviour
     {
         //проверка на нажатие на UI
         bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+
+        if (isOverUI)
+            UnselectPreviousRoad();
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
@@ -219,11 +223,7 @@ public class RoadEditor : MonoBehaviour
     {
         if (currentRoad != null)
         {
-            currentRoad.startLanes.Clear();
-            currentRoad.endLanes.Clear();
-
-            currentRoad.startLanes.Add(new Lane(currentRoad.path, true, RoadDisplaing.roadWidth * 0.2f, 60));
-            currentRoad.endLanes.Add(new Lane(currentRoad.path, false, -RoadDisplaing.roadWidth * 0.2f, 60));
+            currentRoad.UpdateLanes();
 
             currentRoad = null;
             currentRoadDisplaing.HidePoints();

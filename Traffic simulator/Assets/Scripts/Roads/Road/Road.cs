@@ -34,11 +34,15 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
         {
             startSnapPoint = snapPoint;
             roadDisplaing.StartCarSpawner.gameObject.SetActive(false);
+
+            endLanes[0].SetDefaultConnectSpeed(true);
         }
         else
         {
             endSnapPoint = snapPoint;
             roadDisplaing.EndCarSpawner.gameObject.SetActive(false);
+
+            startLanes[0].SetDefaultConnectSpeed(false);
         }
         snapPoint.ConnectRoad(this, startConnecting);
     }
@@ -83,7 +87,23 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
         }
     }
 
-    void UpdateLanes()
+    public CrossroadPath GetStartCrossroadPath()
+    {
+        if (startSnapPoint == null)
+            return null;
+
+        return startSnapPoint.crossroadPath;
+    }
+
+    public CrossroadPath GetEndCrossroadPath()
+    {
+        if (endSnapPoint == null)
+            return null;
+
+        return endSnapPoint.crossroadPath;
+    }
+
+    public void UpdateLanes()
     {
         startLanes.Clear();
         endLanes.Clear();

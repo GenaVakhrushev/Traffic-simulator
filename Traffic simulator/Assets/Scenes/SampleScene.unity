@@ -3555,7 +3555,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0, y: 10, z: -5}
+  m_LocalPosition: {x: 0, y: 25, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -3576,7 +3576,7 @@ MonoBehaviour:
   speed: 15
   verticalSpeed: 150
   mouseSensitivity: 150
-  defaultHeight: 20
+  defaultHeight: 25
   defaultAngles: {x: 60, y: 0, z: 0}
 --- !u!114 &534669908
 MonoBehaviour:
@@ -3593,7 +3593,7 @@ MonoBehaviour:
   Terrain: {fileID: 952057367}
   Size: 2
   Form: {fileID: 21300000, guid: 5f36bc008d939ce4c81828c8b3557395, type: 3}
-  ChangingSpeed: 24.45
+  ChangingSpeed: 20
   terrainMaterial: {fileID: 2100000, guid: a488d18ba8e17da4fb1219b756062704, type: 2}
 --- !u!114 &534669909
 MonoBehaviour:

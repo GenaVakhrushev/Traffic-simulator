@@ -13,7 +13,8 @@ public class CrossroadPath : MonoBehaviour, ILaneable
     Crossroad crossroad;
     SnapPoint[] snapPoints;
 
-    SnapPoint parentSpanPoint;
+    public SnapPoint parentSpanPoint;
+    public SnapPoint leftSnapPoint;
 
    float spacing = 0.1f;
 
@@ -25,6 +26,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         crossroad = GetComponentInParent<Crossroad>();
         snapPoints = crossroad.GetComponentsInChildren<SnapPoint>();
         parentSpanPoint = GetComponentInParent<SnapPoint>();
+        leftSnapPoint = GetLeftSnapPoint();
 
         for (int i = 0; i < snapPoints.Length; i++)
         {
@@ -38,9 +40,21 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         }
     }
 
+    SnapPoint GetLeftSnapPoint()
+    {
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            float distBetweenSnapAndLeftPoints = Vector3.Distance(parentSpanPoint.transform.position - parentSpanPoint.transform.right, snapPoints[i].transform.position);
+            float distBetweenSnapAndParentPoints = Vector3.Distance(parentSpanPoint.transform.position, snapPoints[i].transform.position);
+            if (distBetweenSnapAndLeftPoints < distBetweenSnapAndParentPoints)
+                return snapPoints[i];
+        }
+        return null;
+    }
+
     void CreatePath(SnapPoint point)
     {
-        Vector3 snapPointBezierPoint = point.transform.position - point.transform.right * 0.4f;
+        Vector3 snapPointBezierPoint = point.transform.position + (point.transform.position - point.transform.GetChild(0).transform.position);
         Vector3[] points;
         if (point != parentSpanPoint)
         {
@@ -57,8 +71,8 @@ public class CrossroadPath : MonoBehaviour, ILaneable
             points = new Vector3[]
             {
                 transform.position,
-                transform.position + 1.5f * transform.forward,
-                snapPointBezierPoint + 1.5f * transform.forward,
+                transform.position + transform.forward * RoadDisplaing.roadWidth * 0.75f,
+                snapPointBezierPoint + transform.forward * RoadDisplaing.roadWidth * 0.75f,
                 snapPointBezierPoint
             };
         }
@@ -110,6 +124,30 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         return snapPoint.connectedRoad;
     }
 
+    public bool IsAllLanesBlocked()
+    {
+        foreach (SnapPoint snapPoint in snapPoints)
+        {
+            Road road = snapPoint.connectedRoad;
+            if (snapPoint.startOfRoadConnected && !road.endLanes[0].StartBlocked || !snapPoint.startOfRoadConnected && !road.startLanes[0].EndBlocked)
+                return false;
+        }
+
+        return true;
+    }
+    
+    public int MinRoadId()
+    {
+        int minId = int.MaxValue;
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            int roadId = snapPoints[i].connectedRoad.GetInstanceID();
+            if (roadId < minId)
+                minId = roadId;
+        }
+        return minId;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Start();
@@ -120,7 +158,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         Gizmos.color = Color.blue;
         foreach (SnapPoint snapPoint in snapPoints)
         {
-            Gizmos.DrawSphere(snapPoint.transform.position - snapPoint.transform.right * 0.4f, 0.1f);
+            Gizmos.DrawSphere(snapPoint.transform.position + (snapPoint.transform.position - snapPoint.transform.GetChild(0).transform.position), 0.1f);
         }
 
         foreach (Path path in possiplePaths)

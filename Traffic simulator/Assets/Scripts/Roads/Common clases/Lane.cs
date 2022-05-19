@@ -5,6 +5,10 @@ using UnityEngine;
 public class Lane
 {
     List<LanePoint> lanePoints;
+    float maxSpeed;
+
+    public bool StartBlocked = false;
+    public bool EndBlocked = false;
 
     public LanePoint this[int i]
     {
@@ -15,9 +19,12 @@ public class Lane
     }
     public int NumPoints => lanePoints.Count;
 
+    delegate float Speed(int[] args);
+
     public Lane(Path path, bool fromStartToEnd, float offset, float maxSpeed)
     {
         lanePoints = new List<LanePoint>();
+        this.maxSpeed = maxSpeed;
         for (int i = 0; i < path.CachedEvenlySpacedPoints.Length; i++)
         {
             Vector3 point = path.CachedEvenlySpacedPoints[i];
@@ -54,14 +61,76 @@ public class Lane
                 right = new Vector3(forward.z, forward.y, -forward.x);
             }
 
-            lanePoints.Add(new LanePoint { position = point + right, maxSpeed = maxSpeed });
+            lanePoints.Add(new LanePoint { position = point + right, speed = maxSpeed });
         }
         
+    }
+
+    void ChangeSpeed(Speed speed, int index, float distance, bool fromStart)
+    {
+        int distToIndexDifference = (int)(distance / RoadDisplaing.spacing);
+        int startIndex = index - distToIndexDifference * (fromStart ? -1 : 1);
+        
+        for (int i = startIndex; i != index + (fromStart ? -1 : 1); i += fromStart ? -1 : 1)
+        {
+            if (i >= 0 && i < NumPoints)
+            {
+                lanePoints[i].speed = speed.Invoke(new int[] { i, startIndex});
+                //Debug.Log(lanePoints[i].speed);
+            }
+        }
+    }
+
+    public void SetSpeed(float speed, int index, float distance, bool fromStart)
+    {
+        
+        ChangeSpeed((args) => speed, index, distance, fromStart);
+    }
+
+    public void SetGradientSpeed(float speed, int index, float distance, bool fromStart)
+    {
+        float diffSpeedAndMaxSpeed = maxSpeed - speed;
+        ChangeSpeed((args) => maxSpeed - diffSpeedAndMaxSpeed * (args[1] - args[0]) / (args[1] - index)
+        , index, distance, fromStart);
+
+    }
+
+    public void ResetSpeed(int index, float distance, bool fromStart)
+    {
+        ChangeSpeed((args) => maxSpeed, index, distance, fromStart);
+    }
+
+    public void SetDefaultConnectSpeed(bool fromStart)
+    {
+        if (fromStart)
+            StartBlocked = false;
+        else 
+            EndBlocked = false;
+        SetGradientSpeed(40, fromStart ? 0 : NumPoints - 1, 10, fromStart);
+    }
+
+    public void SetDefaultConnectSpeedNoBlockChange(bool fromStart)
+    {
+        SetGradientSpeed(40, fromStart ? 0 : NumPoints - 1, 10, fromStart);
+    }
+
+    public void SetStop(bool fromStart)
+    {
+        if (fromStart && !StartBlocked)
+        {
+            StartBlocked = true;
+            SetGradientSpeed(0, fromStart ? 0 : NumPoints - 1, 5, fromStart);
+        }
+        else if (!fromStart && !EndBlocked)
+        {
+            EndBlocked = true;
+            SetGradientSpeed(0, fromStart ? 0 : NumPoints - 1, 5, fromStart);
+        }
     }
 }
 
 public class LanePoint
 {
     public Vector3 position;
-    public float maxSpeed;
+    public float speed;
 }
