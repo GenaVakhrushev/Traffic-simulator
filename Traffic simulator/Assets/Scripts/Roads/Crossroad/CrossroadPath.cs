@@ -161,9 +161,11 @@ public class CrossroadPath : MonoBehaviour, ILaneable
             Gizmos.DrawSphere(snapPoint.transform.position + (snapPoint.transform.position - snapPoint.transform.GetChild(0).transform.position), 0.1f);
         }
 
+#if UNITY_EDITOR
         foreach (Path path in possiplePaths)
         {
             Handles.DrawBezier(path[0], path[3], path[1], path[2], Color.red, null, 2f);
         }
+#endif
     }
 }

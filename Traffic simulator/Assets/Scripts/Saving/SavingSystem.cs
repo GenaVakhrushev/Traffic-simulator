@@ -6,14 +6,20 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System;
 using UnityEditor;
+using AnotherFileBrowser.Windows;
 
 public class SavingSystem : MonoBehaviour
 {
     //сохранение
     public static void Save()
     {
-        //string path = Application.persistentDataPath + "/testlevel.save";
-        string path = EditorUtility.SaveFilePanel("Выберите путь сохранения", "", "My save", "save");
+        string path = "";
+
+        var bp = new BrowserProperties();
+        bp.filter = "Save files (*.save)|*.save";
+
+        new FileBrowser().OpenFileBrowser(bp, result => path = result);
+
         if (path.Length == 0)
             return;
         FileStream stream = new FileStream(path, FileMode.Create);
@@ -38,8 +44,13 @@ public class SavingSystem : MonoBehaviour
 
     public static void Load()
     {
-        //string path = Application.persistentDataPath + "/testlevel.save";
-        string path = EditorUtility.OpenFilePanel("Выберите файл сохранения", "", "save");
+        string path = "";
+
+        var bp = new BrowserProperties();
+        bp.filter = "Save files (*.save)|*.save";
+
+        new FileBrowser().OpenFileBrowser(bp, result => path = result);
+
         if (File.Exists(path))
         {
             BinaryFormatter formatter = new BinaryFormatter();
