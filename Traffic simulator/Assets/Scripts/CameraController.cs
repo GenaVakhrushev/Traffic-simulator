@@ -24,17 +24,22 @@ public class CameraController : MonoBehaviour
 
     Clickable currentClickable;
 
+    Ray ray => Camera.main.ScreenPointToRay(Input.mousePosition);
+    RaycastHit hit;
+
+
     void Update()
     {
         if (ModeChanger.CurrentMode != Mode.View)
             return;
 
         bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
-        if (!isOverUI && Input.GetMouseButtonUp(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
 
+        if (isOverUI)
+            return;
+
+        if (Input.GetMouseButtonUp(0))
+        {
             Physics.Raycast(ray, out hit);
             Clickable clickable = hit.transform.GetComponentInParent<Clickable>();
 
@@ -47,6 +52,15 @@ public class CameraController : MonoBehaviour
             {
                 currentClickable.panel.HidePanel();
             }
+        }
+
+        if(Input.GetMouseButtonUp(1) && Input.GetKey(KeyCode.LeftAlt))
+        {
+            Physics.Raycast(ray, out hit);
+            IDeleteable deleteable = hit.transform.GetComponentInParent<IDeleteable>();
+
+            if (deleteable != null)
+                deleteable.Delete();
         }
     }
 

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Road : MonoBehaviour, ISaveable, ILaneable
+public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
 {
     public Path path;
     public List<Lane> startLanes;
@@ -54,12 +54,14 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
             startSnapPoint.DisconnectRoad();
             startSnapPoint = null;
             roadDisplaing.StartCarSpawner.gameObject.SetActive(true);
+            path.DisconnectStartOrEndPoint(0);
         }
         else
         {
             endSnapPoint.DisconnectRoad();
             endSnapPoint = null;
             roadDisplaing.EndCarSpawner.gameObject.SetActive(true);
+            path.DisconnectStartOrEndPoint(path.NumPoints - 1);
         }
     }
 
@@ -177,6 +179,21 @@ public class Road : MonoBehaviour, ISaveable, ILaneable
         return Helper.ObjectToByteArray(new RoadInfo(path));
     }
     #endregion
+
+    public void Delete()
+    {
+        if(startSnapPoint != null)
+        {
+            startSnapPoint.DisconnectRoad();
+        }
+
+        if (endSnapPoint != null)
+        {
+            endSnapPoint.DisconnectRoad();
+        }
+
+        Destroy(gameObject);
+    }
 }
 
 //сохраняемая о дороге информация

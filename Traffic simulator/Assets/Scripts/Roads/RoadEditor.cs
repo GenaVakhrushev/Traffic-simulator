@@ -309,11 +309,6 @@ public class RoadEditor : MonoBehaviour
                     currentRoad.DisconnectSnapPoint(false);
                 }
                 
-                if (needDisconnectStart || needDisconnectEnd)
-                {
-                    currentRoad.path.DisconnectStartOrEndPoint(currentPointIndex);
-                }
-                
                 currentRoad.path.MovePoint(currentPointIndex, newPosition);
             }
         }

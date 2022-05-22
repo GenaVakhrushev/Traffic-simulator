@@ -18,7 +18,7 @@ public class CrossroadInfo
     }
 }
 
-public class Crossroad : Clickable, ISaveable
+public class Crossroad : Clickable, ISaveable, IDeleteable
 {
     SnapPoint[] snapPoints;
 
@@ -76,4 +76,12 @@ public class Crossroad : Clickable, ISaveable
         }
     }
     #endregion
+    public void Delete()
+    {
+        Destroy(gameObject);
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            snapPoints[i].connectedRoad.DisconnectSnapPoint(snapPoints[i].startOfRoadConnected);
+        }
+    }
 }
