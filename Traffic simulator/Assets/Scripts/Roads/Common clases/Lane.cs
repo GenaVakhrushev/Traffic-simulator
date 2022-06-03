@@ -61,7 +61,7 @@ public class Lane
                 right = new Vector3(forward.z, forward.y, -forward.x);
             }
 
-            lanePoints.Add(new LanePoint { position = point + right, speed = maxSpeed });
+            lanePoints.Add(new LanePoint { position = point + right, speed = maxSpeed, maxSpeed = maxSpeed });
         }
         
     }
@@ -81,9 +81,13 @@ public class Lane
         }
     }
 
+    public void SetMaxSpeed(int index, float distance, bool fromStart)
+    {
+        ChangeSpeed((args) => maxSpeed, index, distance, fromStart);
+    }
+
     public void SetSpeed(float speed, int index, float distance, bool fromStart)
     {
-        
         ChangeSpeed((args) => speed, index, distance, fromStart);
     }
 
@@ -133,4 +137,5 @@ public class LanePoint
 {
     public Vector3 position;
     public float speed;
+    public float maxSpeed;
 }

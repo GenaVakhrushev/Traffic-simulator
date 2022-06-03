@@ -42,7 +42,6 @@ public class Car : MonoBehaviour, IPauseable
         Speed += acceleration;
         if (Speed > currentLane[currentPointIndex].speed)
             Speed = currentLane[currentPointIndex].speed;
-
         currentLane.SetSpeed(Speed, currentPointIndex, 3, !fromStartToEnd);
 
         float distToNextPoint = Vector3.Distance(transform.position, nextPoint);
@@ -50,6 +49,8 @@ public class Car : MonoBehaviour, IPauseable
         //если машина дошла до следующей точки - определить следующую
         if(distToNextPoint < moveVectorLen)
         {
+            currentLane.SetMaxSpeed(currentPointIndex, 3, !fromStartToEnd);
+
             currentPointIndex = nextPointIndex;
             nextPointIndex = CalculateNextPointIndex();
 
