@@ -2,6 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//сохраняемая о дороге информация
+[System.Serializable]
+public class RoadInfo
+{
+    PathInfo pathInfo;
+    CarSpawnerInfo startCarSpawnerInfo;
+    CarSpawnerInfo endCarSpawnerInfo;
+
+    public PathInfo PathInfo => pathInfo;
+    public CarSpawnerInfo StartCarSpawnerInfo => startCarSpawnerInfo;
+    public CarSpawnerInfo EndCarSpawnerInfo => endCarSpawnerInfo;
+
+    public RoadInfo(Path path, CarSpawner startCarSpawner, CarSpawner endCarSpawner)
+    {
+        pathInfo = new PathInfo(path);
+        startCarSpawnerInfo = new CarSpawnerInfo(startCarSpawner);
+        endCarSpawnerInfo = new CarSpawnerInfo(endCarSpawner);
+    }
+}
+
 public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
 {
     public Path path;
@@ -16,6 +36,9 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
     public RoadDisplaing RoadDisplaing => roadDisplaing;
     public SnapPoint StartSnapPoint => startSnapPoint;
     public SnapPoint EndSnapPoint => endSnapPoint;
+
+    public CarSpawner StartCarSpawner;
+    public CarSpawner EndCarSpawner;
 
     void Awake()
     {
@@ -33,14 +56,14 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
         if(startConnecting)
         {
             startSnapPoint = snapPoint;
-            roadDisplaing.StartCarSpawner.gameObject.SetActive(false);
+            StartCarSpawner.gameObject.SetActive(false);
 
             endLanes[0].SetDefaultConnectSpeed(true);
         }
         else
         {
             endSnapPoint = snapPoint;
-            roadDisplaing.EndCarSpawner.gameObject.SetActive(false);
+            EndCarSpawner.gameObject.SetActive(false);
 
             startLanes[0].SetDefaultConnectSpeed(false);
         }
@@ -53,14 +76,14 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
         {
             startSnapPoint.DisconnectRoad();
             startSnapPoint = null;
-            roadDisplaing.StartCarSpawner.gameObject.SetActive(true);
+            StartCarSpawner.gameObject.SetActive(true);
             path.DisconnectStartOrEndPoint(0);
         }
         else
         {
             endSnapPoint.DisconnectRoad();
             endSnapPoint = null;
-            roadDisplaing.EndCarSpawner.gameObject.SetActive(true);
+            EndCarSpawner.gameObject.SetActive(true);
             path.DisconnectStartOrEndPoint(path.NumPoints - 1);
         }
     }
@@ -122,7 +145,10 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
         RoadInfo roadInfo = Helper.ByteArrayToObject(info) as RoadInfo;
         Path newPath = new Path(roadInfo.PathInfo);
         path = newPath;
-        
+
+        StartCarSpawner.LoadInfo(roadInfo.StartCarSpawnerInfo);
+        EndCarSpawner.LoadInfo(roadInfo.EndCarSpawnerInfo);
+
         roadDisplaing.UpdatePoints();
         roadDisplaing.HidePoints();
 
@@ -176,7 +202,7 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
 
     public byte[] SaveInfo()
     {
-        return Helper.ObjectToByteArray(new RoadInfo(path));
+        return Helper.ObjectToByteArray(new RoadInfo(path, StartCarSpawner, EndCarSpawner));
     }
     #endregion
 
@@ -193,19 +219,5 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
         }
 
         Destroy(gameObject);
-    }
-}
-
-//сохраняемая о дороге информация
-[System.Serializable]
-public class RoadInfo
-{
-    PathInfo pathInfo;
-
-    public PathInfo PathInfo => pathInfo;
-
-    public RoadInfo(Path path)
-    {
-        pathInfo = new PathInfo(path);
     }
 }

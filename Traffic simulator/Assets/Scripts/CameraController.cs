@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour
         {
             Physics.Raycast(ray, out hit);
             Clickable clickable = hit.transform.GetComponentInParent<Clickable>();
-
+            
             if (clickable)
             {
                 clickable.OnClick();

@@ -16,17 +16,25 @@ public class CarSpawnerPanel : Panel
     public GameObject RandomInterval;
 
     CarSpawner carSpawner;
-    Renderer spawnerRenderer;
 
     public override void FillSettings(Clickable clickable)
     {
         base.FillSettings(clickable);
         carSpawner = (CarSpawner)clickable;
-        spawnerRenderer = carSpawner.GetComponentInChildren<Renderer>();
 
         IsActiveToggle.isOn = carSpawner.IsActive;
         CarTypeDropdown.value = (int)carSpawner.CarType;
         IntervalTypeDropdown.value = (int)carSpawner.IntervalType;
+        if(carSpawner.IntervalType == IntervalType.Fixed)
+        {
+            FixedInterval.SetActive(true);
+            RandomInterval.SetActive(false);
+        }
+        else
+        {
+            FixedInterval.SetActive(false);
+            RandomInterval.SetActive(true);
+        }
         IntervalTimeInputField.text = carSpawner.SpawnDeltaTime.ToString();
         IntervalStartInputField.text = carSpawner.IntervalStart.ToString();
         IntervalEndInputField.text = carSpawner.IntervalEnd.ToString();
@@ -38,11 +46,6 @@ public class CarSpawnerPanel : Panel
             return;
 
         carSpawner.IsActive = IsActiveToggle.isOn;
-        Color newColor = spawnerRenderer.material.color;
-        if (carSpawner.IsActive)
-            spawnerRenderer.material.color = new Color(newColor.r, newColor.g, newColor.b, 1f);
-        else
-            spawnerRenderer.material.color = new Color(newColor.r, newColor.g, newColor.b, 0.5f);
     }
 
     public void SetCarType()

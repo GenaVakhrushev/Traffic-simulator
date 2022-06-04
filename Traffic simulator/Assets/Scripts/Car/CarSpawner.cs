@@ -5,6 +5,29 @@ using UnityEngine;
 public enum CarType { Passenger, Truck, Public }
 public enum IntervalType { Fixed, Random }
 
+[System.Serializable]
+public class CarSpawnerInfo
+{
+    public CarType carType;
+    public IntervalType intervalType;
+    public float spawnDeltaTime;
+    public float intervalStart;
+    public float intervalEnd;
+    public bool isActive;
+    public bool onStart;
+
+    public CarSpawnerInfo(CarSpawner carSpawner)
+    {
+        carType = carSpawner.CarType;
+        intervalType = carSpawner.IntervalType;
+        spawnDeltaTime = carSpawner.SpawnDeltaTime;
+        intervalStart = carSpawner.IntervalStart;
+        intervalEnd = carSpawner.IntervalEnd;
+        isActive = carSpawner.IsActive;
+        onStart = carSpawner.onStart;
+    }
+}
+
 public class CarSpawner : Clickable, IPauseable
 {
     public CarType CarType = CarType.Passenger;
@@ -35,6 +58,13 @@ public class CarSpawner : Clickable, IPauseable
         set
         {
             isActive = value;
+
+            Color newColor = spawnerRenderer.material.color;
+            if (IsActive)
+                spawnerRenderer.material.color = new Color(newColor.r, newColor.g, newColor.b, 1f);
+            else
+                spawnerRenderer.material.color = new Color(newColor.r, newColor.g, newColor.b, 0.5f);
+
             if (isActive && GameStateManager.CurrentGameState == GameState.Play)
             {
                 StartSpawn();
@@ -52,6 +82,13 @@ public class CarSpawner : Clickable, IPauseable
     public bool onStart;
 
     Road road;
+
+    Renderer spawnerRenderer;
+
+    void Awake()
+    {
+        spawnerRenderer = GetComponentInChildren<Renderer>();
+    }
 
     public override void Start()
     {
@@ -100,5 +137,16 @@ public class CarSpawner : Clickable, IPauseable
     public void OnRestart()
     {
         StopSpawn();
+    }
+
+    public void LoadInfo(CarSpawnerInfo carSpawnerInfo)
+    {
+        CarType = carSpawnerInfo.carType;
+        IntervalType = carSpawnerInfo.intervalType;
+        spawnDeltaTime = carSpawnerInfo.spawnDeltaTime;
+        IntervalStart = carSpawnerInfo.intervalStart;
+        IntervalEnd = carSpawnerInfo.intervalEnd;
+        IsActive = carSpawnerInfo.isActive;
+        onStart = carSpawnerInfo.onStart;
     }
 }

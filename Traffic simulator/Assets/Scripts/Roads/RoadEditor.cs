@@ -55,14 +55,11 @@ public class RoadEditor : MonoBehaviour
             return newPosition;
         }
     }
-
+    
     private void Update()
     {
         //проверка на нажатие на UI
         bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
-
-        if (isOverUI)
-            UnselectPreviousRoad();
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -223,8 +220,6 @@ public class RoadEditor : MonoBehaviour
     {
         if (currentRoad != null)
         {
-            currentRoad.UpdateLanes();
-
             currentRoad = null;
             currentRoadDisplaing.HidePoints();
 
@@ -377,4 +372,9 @@ public class RoadEditor : MonoBehaviour
             currentRoadDisplaing.SetDisplayControlPoints(toggle.isOn);
     }
     #endregion
+
+    private void OnDisable()
+    {
+        UnselectPreviousRoad();
+    }
 }

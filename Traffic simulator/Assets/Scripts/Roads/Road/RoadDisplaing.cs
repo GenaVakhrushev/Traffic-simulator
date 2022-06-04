@@ -28,9 +28,6 @@ public class RoadDisplaing : MonoBehaviour
     MeshRenderer meshRenderer;
     MeshCollider meshCollider;
 
-    public CarSpawner StartCarSpawner { get; private set; }
-    public CarSpawner EndCarSpawner { get; private set; }
-
     private void Awake()
     {
         ZTestMaterial.color = RoadEditorSettings.segmentCol;
@@ -42,10 +39,10 @@ public class RoadDisplaing : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
 
-        StartCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[0], Quaternion.identity, transform).GetComponent<CarSpawner>();
-        StartCarSpawner.onStart = true;
-        EndCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[path.NumPoints - 1], Quaternion.identity, transform).GetComponent<CarSpawner>();
-        EndCarSpawner.onStart = false;
+        road.StartCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[0], Quaternion.identity, transform).GetComponent<CarSpawner>();
+        road.StartCarSpawner.onStart = true;
+        road.EndCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[path.NumPoints - 1], Quaternion.identity, transform).GetComponent<CarSpawner>();
+        road.EndCarSpawner.onStart = false;
 
         UpdatePoints();
     }
@@ -71,11 +68,12 @@ public class RoadDisplaing : MonoBehaviour
         Vector3 startRightOffset = new Vector3(startForward.z, startForward.y, -startForward.x) * roadWidth * 0.2f;
         Vector3 endRightOffset = new Vector3(-endForward.z, endForward.y, endForward.x) * roadWidth * 0.2f;
 
-        StartCarSpawner.transform.position = path[0] + startRightOffset;
-        EndCarSpawner.transform.position = path[path.NumPoints - 1] + endRightOffset;
+        road.StartCarSpawner.transform.position = path[0] + startRightOffset;
+        road.EndCarSpawner.transform.position = path[path.NumPoints - 1] + endRightOffset;
 
         DrawLines();
-        UpdateMesh();        
+        UpdateMesh();
+        road.UpdateLanes();
     }
 
     private void UpdateMesh()

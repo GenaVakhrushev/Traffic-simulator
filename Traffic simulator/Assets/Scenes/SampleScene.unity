@@ -4359,17 +4359,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 788369620}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b27c349b4ee0a81488d3c48a01515594, type: 3}
+  m_Script: {fileID: 11500000, guid: 02b9344523d0d2c4584a7c2b14511285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsActiveToggle: {fileID: 0}
-  CarTypeDropdown: {fileID: 0}
-  IntervalTypeDropdown: {fileID: 0}
-  IntervalTimeInputField: {fileID: 0}
-  IntervalStartInputField: {fileID: 0}
-  IntervalEndInputField: {fileID: 0}
-  FixedInterval: {fileID: 0}
-  RandomInterval: {fileID: 0}
 --- !u!114 &788369622
 MonoBehaviour:
   m_ObjectHideFlags: 0

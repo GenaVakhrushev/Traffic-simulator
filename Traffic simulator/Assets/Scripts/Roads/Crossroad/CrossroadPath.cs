@@ -129,6 +129,8 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         foreach (SnapPoint snapPoint in snapPoints)
         {
             Road road = snapPoint.connectedRoad;
+            if (road == null)
+                return false;
             if (snapPoint.startOfRoadConnected && !road.endLanes[0].StartBlocked || !snapPoint.startOfRoadConnected && !road.startLanes[0].EndBlocked)
                 return false;
         }
