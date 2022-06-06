@@ -113,8 +113,8 @@ public class CarSpawner : Clickable, IPauseable
     IEnumerator SpawnCar()
     {
         Car newCar = Instantiate(Prefabs.Instance.Car, transform.position, Quaternion.identity).GetComponent<Car>();
-        newCar.fromStartToEnd = onStart;
         newCar.currentLaneable = road;
+        newCar.currentLane = onStart ? road.startLanes[0] : road.endLanes[0];
         road.cars.Add(newCar);
         if (IntervalType == IntervalType.Fixed)
             yield return new WaitForSeconds(SpawnDeltaTime);
@@ -148,6 +148,6 @@ public class CarSpawner : Clickable, IPauseable
         IntervalStart = carSpawnerInfo.intervalStart;
         IntervalEnd = carSpawnerInfo.intervalEnd;
         IsActive = carSpawnerInfo.isActive;
-        onStart = carSpawnerInfo.onStart;
+        //onStart = carSpawnerInfo.onStart;
     }
 }

@@ -157,6 +157,8 @@ public class RoadEditor : MonoBehaviour
 
     private void ReleaseCrossroad()
     {
+        if (currentCrossroad)
+            currentCrossroad.UpdateCrossroadPaths();
         currentCrossroad = null;
     }
 

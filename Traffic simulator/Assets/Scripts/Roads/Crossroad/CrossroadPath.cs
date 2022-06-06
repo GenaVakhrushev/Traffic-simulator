@@ -18,7 +18,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
 
    float spacing = 0.1f;
 
-    private void Start()
+    public void Start()
     {
         possiplePaths = new List<Path>();
         lanes = new List<Lane>();
@@ -117,9 +117,11 @@ public class CrossroadPath : MonoBehaviour, ILaneable
     public ILaneable GetNextLaneable(Car car)
     {
         int carPathIndex = GetCarPathIndex(car);
+        Debug.Log(carPathIndex);
         SnapPoint snapPoint = snapPoints[carPathIndex];
-        car.fromStartToEnd = snapPoint.startOfRoadConnected;
         carsByPaths[carPathIndex].Remove(car);
+        if(snapPoint.connectedRoad)
+            car.currentLane = snapPoint.startOfRoadConnected ? snapPoint.connectedRoad.startLanes[0] : snapPoint.connectedRoad.endLanes[0];
 
         return snapPoint.connectedRoad;
     }
@@ -131,7 +133,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
             Road road = snapPoint.connectedRoad;
             if (road == null)
                 return false;
-            if (snapPoint.startOfRoadConnected && !road.endLanes[0].StartBlocked || !snapPoint.startOfRoadConnected && !road.startLanes[0].EndBlocked)
+            if (snapPoint.startOfRoadConnected && !road.endLanes[0].EndBlocked || !snapPoint.startOfRoadConnected && !road.startLanes[0].EndBlocked)
                 return false;
         }
 

@@ -6,8 +6,7 @@ public class Lane
 {
     List<LanePoint> lanePoints;
     float maxSpeed;
-
-    public bool StartBlocked = false;
+    
     public bool EndBlocked = false;
 
     public LanePoint this[int i]
@@ -60,10 +59,11 @@ public class Lane
 
                 right = new Vector3(forward.z, forward.y, -forward.x);
             }
-
+            
             lanePoints.Add(new LanePoint { position = point + right, speed = maxSpeed, maxSpeed = maxSpeed });
         }
-        
+        if (!fromStartToEnd)
+            lanePoints.Reverse();
     }
 
     void ChangeSpeed(Speed speed, int index, float distance, bool fromStart)
@@ -102,34 +102,6 @@ public class Lane
     public void ResetSpeed(int index, float distance, bool fromStart)
     {
         ChangeSpeed((args) => maxSpeed, index, distance, fromStart);
-    }
-
-    public void SetDefaultConnectSpeed(bool fromStart)
-    {
-        if (fromStart)
-            StartBlocked = false;
-        else 
-            EndBlocked = false;
-        SetGradientSpeed(40, fromStart ? 0 : NumPoints - 1, 10, fromStart);
-    }
-
-    public void SetDefaultConnectSpeedNoBlockChange(bool fromStart)
-    {
-        SetGradientSpeed(40, fromStart ? 0 : NumPoints - 1, 10, fromStart);
-    }
-
-    public void SetStop(bool fromStart)
-    {
-        if (fromStart && !StartBlocked)
-        {
-            StartBlocked = true;
-            SetGradientSpeed(0, fromStart ? 0 : NumPoints - 1, 5, fromStart);
-        }
-        else if (!fromStart && !EndBlocked)
-        {
-            EndBlocked = true;
-            SetGradientSpeed(0, fromStart ? 0 : NumPoints - 1, 5, fromStart);
-        }
     }
 }
 

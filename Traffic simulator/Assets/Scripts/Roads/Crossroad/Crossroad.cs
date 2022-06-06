@@ -36,6 +36,15 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
             snapPoint.MoveConnectedRoad();
         }
     }
+
+    public void UpdateCrossroadPaths()
+    {
+        foreach(SnapPoint snapPoint in snapPoints)
+        {
+            snapPoint.crossroadPath.Start();
+        }
+    }
+
     #region For saving
     public PrefabType Prefab => PrefabType.Crossroad;
     public byte[] SaveInfo()

@@ -59,15 +59,11 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         {
             startSnapPoint = snapPoint;
             StartCarSpawner.gameObject.SetActive(false);
-
-            endLanes[0].SetDefaultConnectSpeed(true);
         }
         else
         {
             endSnapPoint = snapPoint;
             EndCarSpawner.gameObject.SetActive(false);
-
-            startLanes[0].SetDefaultConnectSpeed(false);
         }
         snapPoint.ConnectRoad(this, startConnecting);
     }
@@ -92,24 +88,30 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
 
     public Lane GetLane(Car car)
     {
-        return car.fromStartToEnd ? startLanes[0] : endLanes[0];
+        //return car.fromStartOfRoad ? startLanes[0] : endLanes[0];
+        return startLanes[0];
     }
     public ILaneable GetNextLaneable(Car car)
     {
         cars.Remove(car);
-        if (car.fromStartToEnd)
+        
+        if (car.currentLane == startLanes[0])
         {
-            car.fromStartToEnd = true;
             if (endSnapPoint)
+            {
+                car.currentLane = endSnapPoint.crossroadPath.GetLane(car);
                 return endSnapPoint.crossroadPath;
+            }
             else
                 return null;
         }
         else
         {
-            car.fromStartToEnd = true;
             if (startSnapPoint)
+            {
+                car.currentLane = startSnapPoint.crossroadPath.GetLane(car);
                 return startSnapPoint.crossroadPath;
+            }
             else
                 return null;
         }
