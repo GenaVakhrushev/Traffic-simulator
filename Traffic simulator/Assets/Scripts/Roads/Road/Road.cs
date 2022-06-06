@@ -22,9 +22,10 @@ public class RoadInfo
     }
 }
 
-public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
+public class Road : Clickable, ISaveable, ILaneable, IDeleteable
 {
     public Path path;
+    public List<Car> cars;
     public List<Lane> startLanes;
     public List<Lane> endLanes;
 
@@ -45,6 +46,7 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
         path = new Path(transform.position);
         roadDisplaing = GetComponentInChildren<RoadDisplaing>();
 
+        cars = new List<Car>();
         startLanes = new List<Lane>();
         endLanes = new List<Lane>();
 
@@ -94,6 +96,7 @@ public class Road : MonoBehaviour, ISaveable, ILaneable, IDeleteable
     }
     public ILaneable GetNextLaneable(Car car)
     {
+        cars.Remove(car);
         if (car.fromStartToEnd)
         {
             car.fromStartToEnd = true;

@@ -12,7 +12,7 @@ public abstract class Clickable : MonoBehaviour
         panel = PanelsManager.Panels[GetType()].GetComponent<Panel>(); ;
     }
 
-    public virtual void OnClick()
+    public void OnClick()
     {
         panel.FillSettings(this);
     }

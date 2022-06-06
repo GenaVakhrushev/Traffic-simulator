@@ -115,6 +115,7 @@ public class CarSpawner : Clickable, IPauseable
         Car newCar = Instantiate(Prefabs.Instance.Car, transform.position, Quaternion.identity).GetComponent<Car>();
         newCar.fromStartToEnd = onStart;
         newCar.currentLaneable = road;
+        road.cars.Add(newCar);
         if (IntervalType == IntervalType.Fixed)
             yield return new WaitForSeconds(SpawnDeltaTime);
         else

@@ -22,6 +22,7 @@ public class PanelsManager : MonoBehaviour
 
     public GameObject CarSpawnerPanel;
     public GameObject CrossroadPanel;
+    public GameObject RoadPanel;
 
     public static Dictionary<Type, GameObject> Panels = new Dictionary<Type, GameObject>();
 
@@ -31,5 +32,6 @@ public class PanelsManager : MonoBehaviour
 
         Panels.Add(typeof(CarSpawner), CarSpawnerPanel);
         Panels.Add(typeof(Crossroad), CrossroadPanel);
+        Panels.Add(typeof(Road), RoadPanel);
     }
 }

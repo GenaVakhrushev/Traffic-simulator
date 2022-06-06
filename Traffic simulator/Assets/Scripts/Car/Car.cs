@@ -13,7 +13,7 @@ public class Car : MonoBehaviour, IPauseable
 
     float acceleration = 2.5f;
     public float Speed = 60f;
-    float moveVectorLen => Speed * Time.deltaTime * 0.05f;
+    float moveVectorLen => Speed / 3.6f * Time.deltaTime;
 
     float roadComplitionPercent = 0;
 
@@ -122,7 +122,10 @@ public class Car : MonoBehaviour, IPauseable
                 }
 
                 if (currentLaneable.GetType() == typeof(Road))
+                {
                     nextCrossroadPath = fromStartToEnd ? ((Road)currentLaneable).GetEndCrossroadPath() : ((Road)currentLaneable).GetStartCrossroadPath();
+                    ((Road)currentLaneable).cars.Add(this);
+                }
 
                 roadComplitionPercent = 0;
                 if (fromStartToEnd)

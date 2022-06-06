@@ -103,7 +103,7 @@ public class CameraController : MonoBehaviour
         else
             transform.Translate(move, Space.World);
 
-        Vector3 verticalMove = Vector3.up * verticalInput * Time.deltaTime * verticalSpeed;
+        Vector3 verticalMove = Vector3.up * verticalInput * Time.deltaTime * verticalSpeed * transform.position.y / 10;
         transform.Translate(verticalMove, Space.World);
     }
 
