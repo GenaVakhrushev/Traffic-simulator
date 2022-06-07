@@ -44,6 +44,8 @@ public class CameraController : MonoBehaviour
             
             if (clickable)
             {
+                if (currentClickable)
+                    currentClickable.panel.HidePanel();
                 clickable.OnClick();
                 currentClickable = clickable;
             }

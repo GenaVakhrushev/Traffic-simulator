@@ -17,4 +17,14 @@ public static class Bezier
         Vector3 p1 = EvaluateQuadratic(b, c, d, t);
         return Vector3.Lerp(p0, p1, t);
     }
+
+    public static Vector3[] EvaluateBezierPoints(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int dotsCount)
+    {
+        List<Vector3> points = new List<Vector3>();
+        for (float t = 0; t < 1; t += 1.0f / dotsCount)
+        {
+            points.Add(EvaluateCubic(a, b, c, d, t));
+        }
+        return points.ToArray();
+    }
 }

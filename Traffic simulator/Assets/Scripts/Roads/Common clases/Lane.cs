@@ -6,8 +6,6 @@ public class Lane
 {
     List<LanePoint> lanePoints;
     float maxSpeed;
-    
-    public bool EndBlocked = false;
 
     public LanePoint this[int i]
     {

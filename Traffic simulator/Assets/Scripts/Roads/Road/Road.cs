@@ -88,18 +88,27 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
 
     public Lane GetLane(Car car)
     {
-        //return car.fromStartOfRoad ? startLanes[0] : endLanes[0];
+        if (car.currentLane == startLanes[0])
+            return startLanes[0];
+        if (car.currentLane == endLanes[0])
+            return endLanes[0];
+
+        if(car.currentLaneable.GetType() == typeof(CrossroadPath))
+        {
+            CrossroadPath crossroadPath = (CrossroadPath)car.currentLaneable;
+            SnapPoint snapPoint = crossroadPath.GetEndSnapPoint(car);
+            if (snapPoint.connectedRoad)
+                return snapPoint.startOfRoadConnected ? snapPoint.connectedRoad.startLanes[0] : snapPoint.connectedRoad.endLanes[0];
+        }
+
         return startLanes[0];
     }
     public ILaneable GetNextLaneable(Car car)
-    {
-        cars.Remove(car);
-        
+    {        
         if (car.currentLane == startLanes[0])
         {
             if (endSnapPoint)
             {
-                car.currentLane = endSnapPoint.crossroadPath.GetLane(car);
                 return endSnapPoint.crossroadPath;
             }
             else
@@ -109,12 +118,21 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         {
             if (startSnapPoint)
             {
-                car.currentLane = startSnapPoint.crossroadPath.GetLane(car);
                 return startSnapPoint.crossroadPath;
             }
             else
                 return null;
         }
+    }
+
+    public void AddCar(Car car)
+    {
+        cars.Add(car);
+    }
+
+    public void RemoveCar(Car car)
+    {
+        cars.Remove(car);
     }
 
     public CrossroadPath GetStartCrossroadPath()

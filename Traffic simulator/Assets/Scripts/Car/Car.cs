@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,9 +9,6 @@ public class Car : MonoBehaviour, IPauseable
     public Lane currentLane;
 
     CrossroadPath nextCrossroadPath;
-
-    //Lane currentLane => currentLaneable == null ? null : currentLaneable.GetLane(this);
-    //public bool fromStartOfRoad = true;
 
     float acceleration = 2.5f;
     public float Speed = 60f;
@@ -62,38 +60,59 @@ public class Car : MonoBehaviour, IPauseable
             }
         }
         Vector3 moveVector = (nextPoint - transform.position).normalized * moveVectorLen;
-        bool needToGiveWay = currentLane.EndBlocked && DistanceToEndOfLane < 2f;
-
-        if(currentLaneable.GetType() == typeof(Road) && needToGiveWay)
-        {
-            if (nextCrossroadPath.IsAllLanesBlocked() && ((Road)currentLaneable).GetInstanceID() == nextCrossroadPath.MinRoadId())
-            {
-                //currentLane.SetDefaultConnectSpeedNoBlockChange();
-                Speed = currentLane[currentPointIndex].speed;
-                needToGiveWay = false;
-            }            
-        }
+        bool needToGiveWay = CheckGiveWay();
 
         if (!needToGiveWay)
         {
             transform.Translate(moveVector, Space.World);
             transform.LookAt(transform.position + moveVector);
+            currentLane.ResetSpeed(currentPointIndex, 3, true);
         }
         else
         {
             currentLane.SetSpeed(0, currentPointIndex, 3, true);
-        }
+        }                                                                         
+    }
 
-        if (DistanceToEndOfLane < 5f && nextCrossroadPath)
-        {
-            //SetStopToLeftLane();
-        }
+    private bool CheckGiveWay()
+    {
+        if (nextCrossroadPath == null)
+            return false;
+
+        if (DistanceToEndOfLane > 1.5f)
+            return false;
+
+        Crossroad crossroad = nextCrossroadPath.crossroad;
+        if (crossroad.crossroadType == CrossroadType.Regulated)
+            return CheckRegulatedGiveWay();
+
+        if (crossroad.HaveMainRoad)
+            return CheckMainRoadGiveWay();
+
+        CrossroadPath rightCrossroadPath = nextCrossroadPath.crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+
+        if (rightCrossroadPath.HaveCars())
+            return true;
+
+        return false;
+    }
+
+    private bool CheckMainRoadGiveWay()
+    {
+        throw new NotImplementedException();
+    }
+           
+    private bool CheckRegulatedGiveWay()
+    {
+        throw new NotImplementedException();
     }
 
     private void OnDrawGizmosSelected()
     {
-        Debug.Log(Speed + " " + DistanceToEndOfLane + " " + nextCrossroadPath.IsAllLanesBlocked());
+        Debug.Log(Speed + " " + DistanceToEndOfLane + " " + nextCrossroadPath);
+        Helper.CreateCube(nextCrossroadPath.transform.position);
     }
+
     int CalculateNextPointIndex()
     {
         int currentPathIndex = (int)(currentLane.NumPoints * roadComplitionPercent);
@@ -108,19 +127,28 @@ public class Car : MonoBehaviour, IPauseable
                     nextCrossroadPath = null;
                 }
 
-                currentLaneable = currentLaneable.GetNextLaneable(this);
+                ILaneable nextLaneable = currentLaneable.GetNextLaneable(this);
+                if (nextLaneable != null)
+                {
+                    if (nextLaneable.GetType() == typeof(Road))
+                    {
+                        Road road = (Road)nextLaneable;
+                        SnapPoint endSnapPoint = ((CrossroadPath)currentLaneable).GetEndSnapPoint(this);
+                        nextCrossroadPath = endSnapPoint.startOfRoadConnected ? road.GetEndCrossroadPath() : road.GetStartCrossroadPath();
+                    }
+
+                    nextLaneable.AddCar(this);
+                    currentLane = nextLaneable.GetLane(this);
+                }
+
+                currentLaneable.RemoveCar(this);
+                currentLaneable = nextLaneable;        
                
                 //если дальше некуда идти, то уничтожить машину, иначе перейти к следующему участку дороги
                 if (currentLaneable == null)
                 {
                     Destroy(gameObject);
                     return -1;
-                }
-
-                if (currentLaneable.GetType() == typeof(Road))
-                {
-                    nextCrossroadPath = ((Road)currentLaneable).GetEndCrossroadPath();
-                    ((Road)currentLaneable).cars.Add(this);
                 }
 
                 roadComplitionPercent = 0;

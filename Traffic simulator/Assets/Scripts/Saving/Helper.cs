@@ -27,6 +27,10 @@ public static class Helper
             return obj;
         }
     }
+    public static void CreateCube(Vector3 pos, float scale = 0.2f)
+    {
+        CreateCube(pos, Color.white);
+    }
 
     public static void CreateCube(Vector3 pos, Color color, float scale = 0.2f)
     {

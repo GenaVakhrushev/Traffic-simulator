@@ -18,13 +18,28 @@ public class CrossroadInfo
     }
 }
 
+public enum CrossroadType { Unregulated, Regulated }
+
 public class Crossroad : Clickable, ISaveable, IDeleteable
 {
+    public CrossroadType crossroadType = CrossroadType.Unregulated;
+    public bool HaveMainRoad => haveMainRoad;
+    public int[] MainRoadPointIndexes => mainRoadPointIndexes;
+    public SnapPoint[] SnapPoints => snapPoints;
+
+    bool haveMainRoad = false;
+    int[] mainRoadPointIndexes = new int[2];
+
     SnapPoint[] snapPoints;
+
+    LineRenderer lineRenderer;
 
     void Awake()
     {
         snapPoints = GetComponentsInChildren<SnapPoint>();
+        lineRenderer = GetComponent<LineRenderer>();
+        SetMainRoad(0, 1);
+        lineRenderer.enabled = false;
     }
 
     public void MoveCrossroad(Vector3 positionForMove)
@@ -92,5 +107,49 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
         {
             snapPoints[i].connectedRoad.DisconnectSnapPoint(snapPoints[i].startOfRoadConnected);
         }
+    }
+
+    public SnapPoint GetRightSnapPoint(SnapPoint snapPoint)
+    {
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            if (snapPoint == snapPoints[i] && i < snapPoints.Length - 1)
+                return snapPoints[i + 1];
+            if (snapPoint == snapPoints[i] && i == snapPoints.Length - 1)
+                return snapPoints[0];
+        }
+        return null;
+    }
+
+    public void SetHaveMainRoad(bool value)
+    {
+        haveMainRoad = value;
+        lineRenderer.enabled = value;
+        UpdateMainRoadDisplay();
+    }
+
+    public void SetMainRoad(int firstIndex, int secondIndex)
+    {
+        mainRoadPointIndexes[0] = firstIndex;
+        mainRoadPointIndexes[1] = secondIndex;
+
+        UpdateMainRoadDisplay();
+    }
+
+    void UpdateMainRoadDisplay()
+    {
+        Vector3[] points = Bezier.EvaluateBezierPoints(snapPoints[mainRoadPointIndexes[0]].transform.position,
+                                                      transform.position,
+                                                      transform.position,
+                                                      snapPoints[mainRoadPointIndexes[1]].transform.position,
+                                                      20);
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            points[i].y += 0.1f;
+        }
+
+        lineRenderer.positionCount = points.Length;
+        lineRenderer.SetPositions(points);
     }
 }

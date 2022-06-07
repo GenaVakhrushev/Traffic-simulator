@@ -5,51 +5,42 @@ using UnityEngine;
 
 public class CrossroadPath : MonoBehaviour, ILaneable
 {
-    List<Path> possiplePaths;
-    List<Car>[] carsByPaths;
-
+    List<Car>[] carsByLanes;
     List<Lane> lanes;
 
-    Crossroad crossroad;
-    SnapPoint[] snapPoints;
+    List<Path> possiplePaths;
+
+    public Crossroad crossroad;
+    public SnapPoint[] snapPoints;
 
     public SnapPoint parentSpanPoint;
-    public SnapPoint leftSnapPoint;
 
    float spacing = 0.1f;
 
     public void Start()
     {
-        possiplePaths = new List<Path>();
         lanes = new List<Lane>();
+        possiplePaths = new List<Path>();
 
         crossroad = GetComponentInParent<Crossroad>();
         snapPoints = crossroad.GetComponentsInChildren<SnapPoint>();
         parentSpanPoint = GetComponentInParent<SnapPoint>();
-        leftSnapPoint = GetLeftSnapPoint();
 
         for (int i = 0; i < snapPoints.Length; i++)
         {
             CreatePath(snapPoints[i]);
         }
 
-        carsByPaths = new List<Car>[possiplePaths.Count];
-        for (int i = 0; i < carsByPaths.Length; i++)
+        carsByLanes = new List<Car>[lanes.Count];
+        for (int i = 0; i < carsByLanes.Length; i++)
         {
-            carsByPaths[i] = new List<Car>();
+            carsByLanes[i] = new List<Car>();
         }
     }
 
-    SnapPoint GetLeftSnapPoint()
+    public SnapPoint GetEndSnapPoint(Car car)
     {
-        for (int i = 0; i < snapPoints.Length; i++)
-        {
-            float distBetweenSnapAndLeftPoints = Vector3.Distance(parentSpanPoint.transform.position - parentSpanPoint.transform.right, snapPoints[i].transform.position);
-            float distBetweenSnapAndParentPoints = Vector3.Distance(parentSpanPoint.transform.position, snapPoints[i].transform.position);
-            if (distBetweenSnapAndLeftPoints < distBetweenSnapAndParentPoints)
-                return snapPoints[i];
-        }
-        return null;
+        return snapPoints[GetCarLaneIndex(car)];
     }
 
     void CreatePath(SnapPoint point)
@@ -82,16 +73,16 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         lanes.Add(new Lane(newPath, true, 0, 60));
     }
 
-    public Path GetRandomPath()
+    public Lane GetRandomLane()
     {
-        return possiplePaths[Random.Range(0, possiplePaths.Count)];
+        return lanes[Random.Range(0, lanes.Count)];
     }
 
-    int GetCarPathIndex(Car car)
+    int GetCarLaneIndex(Car car)
     {
-        for (int i = 0; i < carsByPaths.Length; i++)
+        for (int i = 0; i < carsByLanes.Length; i++)
         {
-            if(carsByPaths[i].Contains(car))
+            if(carsByLanes[i].Contains(car))
             {
                 return i;
             }
@@ -101,43 +92,28 @@ public class CrossroadPath : MonoBehaviour, ILaneable
 
     public Lane GetLane(Car car)
     {
-        int carPathIndex = GetCarPathIndex(car);
-        if(carPathIndex != -1)
-        {
-            return lanes[carPathIndex];
-        }
-        else
-        {
-            Path newPath = GetRandomPath();
-            int newPathIndex = possiplePaths.IndexOf(newPath);
-            carsByPaths[newPathIndex].Add(car);
-            return lanes[newPathIndex];
-        }
+        int carLaneIndex = GetCarLaneIndex(car);
+        return lanes[carLaneIndex];
     }
     public ILaneable GetNextLaneable(Car car)
     {
-        int carPathIndex = GetCarPathIndex(car);
-        Debug.Log(carPathIndex);
-        SnapPoint snapPoint = snapPoints[carPathIndex];
-        carsByPaths[carPathIndex].Remove(car);
-        if(snapPoint.connectedRoad)
-            car.currentLane = snapPoint.startOfRoadConnected ? snapPoint.connectedRoad.startLanes[0] : snapPoint.connectedRoad.endLanes[0];
-
+        int carLaneIndex = GetCarLaneIndex(car);
+        SnapPoint snapPoint = snapPoints[carLaneIndex];
+        
         return snapPoint.connectedRoad;
     }
 
-    public bool IsAllLanesBlocked()
+    public void AddCar(Car car)
     {
-        foreach (SnapPoint snapPoint in snapPoints)
-        {
-            Road road = snapPoint.connectedRoad;
-            if (road == null)
-                return false;
-            if (snapPoint.startOfRoadConnected && !road.endLanes[0].EndBlocked || !snapPoint.startOfRoadConnected && !road.startLanes[0].EndBlocked)
-                return false;
-        }
+        Lane newLane = GetRandomLane();
+        int newLaneIndex = lanes.IndexOf(newLane);
+        carsByLanes[newLaneIndex].Add(car);
+    }
 
-        return true;
+    public void RemoveCar(Car car)
+    {
+        int carLaneIndex = GetCarLaneIndex(car);
+        carsByLanes[carLaneIndex].Remove(car);
     }
     
     public int MinRoadId()
@@ -150,6 +126,16 @@ public class CrossroadPath : MonoBehaviour, ILaneable
                 minId = roadId;
         }
         return minId;
+    }
+
+    public bool HaveCars()
+    {
+        for (int i = 0; i < carsByLanes.Length; i++)
+        {
+            if (carsByLanes[i].Count != 0)
+                return true;
+        }
+        return false;
     }
 
     private void OnDrawGizmosSelected()
