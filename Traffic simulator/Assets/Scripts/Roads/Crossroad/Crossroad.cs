@@ -7,14 +7,21 @@ using UnityEngine;
 public class CrossroadInfo
 {
     float[] position = new float[3];
+    bool haveMainRoad;
+    CrossroadType crossroadType;
 
     public Vector3 Position => new Vector3(position[0], position[1], position[2]);
+    public bool HaveMainRoad => haveMainRoad;
+    public CrossroadType CrossroadType => crossroadType;
 
-    public CrossroadInfo(Vector3 pos)
+    public CrossroadInfo(Crossroad crossroad)
     {
-        position[0] = pos.x;
-        position[1] = pos.y;
-        position[2] = pos.z;
+        position[0] = crossroad.transform.position.x;
+        position[1] = crossroad.transform.position.y;
+        position[2] = crossroad.transform.position.z;
+
+        haveMainRoad = crossroad.HaveMainRoad;
+        crossroadType = crossroad.CrossroadType;
     }
 }
 
@@ -22,13 +29,14 @@ public enum CrossroadType { Unregulated, Regulated }
 
 public class Crossroad : Clickable, ISaveable, IDeleteable
 {
-    public CrossroadType crossroadType = CrossroadType.Unregulated;
+    bool haveMainRoad = false;
+    int[] mainRoadPointIndexes = new int[2];
+    CrossroadType crossroadType = CrossroadType.Unregulated;
+
+    public CrossroadType CrossroadType => crossroadType;
     public bool HaveMainRoad => haveMainRoad;
     public int[] MainRoadPointIndexes => mainRoadPointIndexes;
     public SnapPoint[] SnapPoints => snapPoints;
-
-    bool haveMainRoad = false;
-    int[] mainRoadPointIndexes = new int[2];
 
     SnapPoint[] snapPoints;
 
@@ -64,13 +72,16 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
     public PrefabType Prefab => PrefabType.Crossroad;
     public byte[] SaveInfo()
     {
-        return Helper.ObjectToByteArray(new CrossroadInfo(transform.position));
+        return Helper.ObjectToByteArray(new CrossroadInfo(this));
     }
 
     public void LoadInfo(byte[] info)
     {
         CrossroadInfo crossroadInfo = Helper.ByteArrayToObject(info) as CrossroadInfo;
         transform.position = crossroadInfo.Position;
+
+        SetHaveMainRoad(crossroadInfo.HaveMainRoad);
+        SetType(crossroadInfo.CrossroadType);
 
         foreach(SnapPoint snapPoint in snapPoints)
         {
@@ -151,5 +162,10 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
 
         lineRenderer.positionCount = points.Length;
         lineRenderer.SetPositions(points);
+    }
+
+    public void SetType(CrossroadType crossroadType)
+    {
+        this.crossroadType = crossroadType;
     }
 }

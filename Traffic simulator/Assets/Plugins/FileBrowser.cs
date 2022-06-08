@@ -3,6 +3,7 @@ using Ookii.Dialogs;
 using System;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace AnotherFileBrowser.Windows
 {
@@ -21,6 +22,7 @@ namespace AnotherFileBrowser.Windows
         public void OpenFileBrowser(BrowserProperties browserProperties, Action<string> filepath)
         {
             var ofd = new VistaOpenFileDialog();
+            ofd.AddExtension = true;
             ofd.Multiselect = false;
             ofd.Title = browserProperties.title == null ? "Select a File" : browserProperties.title;
             ofd.InitialDirectory = browserProperties.initialDir == null ? @"C:\" : browserProperties.initialDir;
@@ -34,7 +36,51 @@ namespace AnotherFileBrowser.Windows
             }
         }
 
-       
+        public void SaveFileBrowser(BrowserProperties browserProperties, Action<string> filepath)
+        {
+            var sfd = new VistaSaveFileDialog();
+            sfd.Title = browserProperties.title == null ? "Select a File" : browserProperties.title;
+            sfd.InitialDirectory = browserProperties.initialDir == null ? @"C:\" : browserProperties.initialDir;
+            sfd.Filter = browserProperties.filter == null ? "All files (*.*)|*.*" : browserProperties.filter;
+            sfd.FilterIndex = browserProperties.filterIndex + 1;
+            sfd.RestoreDirectory = browserProperties.restoreDirectory;
+
+            if (sfd.ShowDialog(new WindowWrapper(GetActiveWindow())) == DialogResult.OK)
+            {
+                //filepath(sfd.FileName);
+                filepath(FileNameForceExtension(sfd));
+            }
+        }
+
+        private static List<string> GetFileExtensions(string filter)
+        {
+            List<string> extensions = new List<string>();
+            var filtersRaw = filter.Split('|');
+            for (int i = 0; i < filtersRaw.Length; i++)
+            {
+                if (i % 2 != 0)
+                {
+                    // Supporting multi doted extensions
+                    extensions.Add(filtersRaw[i].Trim().Replace("*", "").Substring(1));
+                }
+            }
+            return extensions;
+        }
+
+        // Getting filename with selected extension
+        public static string FileNameForceExtension(VistaSaveFileDialog dialog)
+        {
+            string fileName = dialog.FileName;
+            // Retrieving the current selected filter index
+            List<string> extensions = GetFileExtensions(dialog.Filter);
+            string selectedExtension = extensions[dialog.FilterIndex - 1];
+            // Adding extension if need it
+            if (!fileName.EndsWith($".{selectedExtension}"))
+            {
+                fileName = $"{fileName}.{selectedExtension}";
+            }
+            return fileName;
+        }
     }
 
     public class BrowserProperties

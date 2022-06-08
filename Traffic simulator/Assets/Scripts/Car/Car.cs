@@ -83,7 +83,7 @@ public class Car : MonoBehaviour, IPauseable
             return false;
 
         Crossroad crossroad = nextCrossroadPath.crossroad;
-        if (crossroad.crossroadType == CrossroadType.Regulated)
+        if (crossroad.CrossroadType == CrossroadType.Regulated)
             return CheckRegulatedGiveWay();
 
         if (crossroad.HaveMainRoad)

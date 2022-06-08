@@ -18,8 +18,8 @@ public class SavingSystem : MonoBehaviour
         var bp = new BrowserProperties();
         bp.filter = "Save files (*.save)|*.save";
 
-        new FileBrowser().OpenFileBrowser(bp, result => path = result);
-
+        new FileBrowser().SaveFileBrowser(bp, result => path = result);
+        
         if (path.Length == 0)
             return;
         FileStream stream = new FileStream(path, FileMode.Create);
