@@ -8,11 +8,13 @@ public class CrossroadInfo
 {
     float[] position = new float[3];
     bool haveMainRoad;
+    int[] mainRoadPointIndexes;
     CrossroadType crossroadType;
 
     public Vector3 Position => new Vector3(position[0], position[1], position[2]);
     public bool HaveMainRoad => haveMainRoad;
     public CrossroadType CrossroadType => crossroadType;
+    public int[] MainRoadPointIndexes => mainRoadPointIndexes;
 
     public CrossroadInfo(Crossroad crossroad)
     {
@@ -22,6 +24,7 @@ public class CrossroadInfo
 
         haveMainRoad = crossroad.HaveMainRoad;
         crossroadType = crossroad.CrossroadType;
+        mainRoadPointIndexes = crossroad.MainRoadPointIndexes;
     }
 }
 
@@ -81,6 +84,7 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
         transform.position = crossroadInfo.Position;
 
         SetHaveMainRoad(crossroadInfo.HaveMainRoad);
+        SetMainRoad(crossroadInfo.MainRoadPointIndexes[0], crossroadInfo.MainRoadPointIndexes[1]);
         SetType(crossroadInfo.CrossroadType);
 
         foreach(SnapPoint snapPoint in snapPoints)
@@ -91,18 +95,18 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
                 Road road = roadColliders[0].GetComponentInParent<Road>();
                 bool startConnecting;
 
-                if(road.path.StartConnected && !road.path.EndConnected)
+                if(road.Path.StartConnected && !road.Path.EndConnected)
                 {
                     startConnecting = true;
                 }
-                else if(!road.path.StartConnected && road.path.EndConnected)
+                else if(!road.Path.StartConnected && road.Path.EndConnected)
                 {
                     startConnecting = false;
                 }
                 else
                 {
-                    float distToStartPoint = Vector3.Distance(road.path[0], snapPoint.transform.position);
-                    float distToEndPoint = Vector3.Distance(road.path[road.path.NumPoints - 1], snapPoint.transform.position);
+                    float distToStartPoint = Vector3.Distance(road.Path[0], snapPoint.transform.position);
+                    float distToEndPoint = Vector3.Distance(road.Path[road.Path.NumPoints - 1], snapPoint.transform.position);
                     startConnecting = (distToStartPoint < distToEndPoint) ? true : false;
                 }
                 
@@ -130,6 +134,48 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
                 return snapPoints[0];
         }
         return null;
+    }
+
+    public bool AllLinesBlocked()
+    {
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            if (!snapPoints[i].crossroadPath.HaveCars())
+                return false;
+        }
+        return true;
+    }
+
+    public Road RoadWithMinID()
+    {
+        int minId = int.MaxValue;
+        Road resultRoad = null;
+
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            Road road = snapPoints[i].connectedRoad;
+            if (road)
+            {
+                int roadID = road.GetInstanceID();
+                if (roadID < minId)
+                {
+                    minId = roadID;
+                    resultRoad = road;
+                }
+            }
+        }
+
+        return resultRoad;
+    }
+
+    public int GetCrossroadPathNum(CrossroadPath crossroadPath)
+    {
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            if (snapPoints[i].crossroadPath == crossroadPath)
+                return i;
+        }
+        return -1;
     }
 
     public void SetHaveMainRoad(bool value)

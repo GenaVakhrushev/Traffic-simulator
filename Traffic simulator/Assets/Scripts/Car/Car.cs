@@ -9,9 +9,14 @@ public class Car : MonoBehaviour, IPauseable
     public Lane currentLane;
 
     CrossroadPath nextCrossroadPath;
+    ILaneable nextLaneable;
 
-    float acceleration = 2.5f;
+    public Car nextCar;
+    float distanceToNextCar => nextCar ? Math.Abs(nextCar.currentPointIndex - currentPointIndex) * RoadDisplaing.spacing : float.MaxValue;
+    float carsMaxDist = 3f;
+
     public float Speed = 60f;
+    float acceleration => 2.5f * Time.deltaTime;
     float moveVectorLen => Speed / 3.6f * Time.deltaTime;
 
     float roadComplitionPercent = 0;
@@ -30,7 +35,10 @@ public class Car : MonoBehaviour, IPauseable
         GameStateManager.OnGameStateChanged.AddListener(OnGameStateChanged);
         nextPointIndex = CalculateNextPointIndex();
         currentPointIndex =  0;
-        nextCrossroadPath = ((Road)currentLaneable).GetEndCrossroadPath();
+
+        Road road = (Road)currentLaneable;
+        nextCrossroadPath = (CrossroadPath)currentLaneable.GetNextLaneable(this);
+        nextLaneable = nextCrossroadPath;
     }
 
     private void FixedUpdate()
@@ -41,7 +49,11 @@ public class Car : MonoBehaviour, IPauseable
         Speed += acceleration;
         if (Speed > currentLane[currentPointIndex].speed)
             Speed = currentLane[currentPointIndex].speed;
-        currentLane.SetSpeed(Speed, currentPointIndex, 3, false);
+
+        if (nextCar != null && distanceToNextCar < carsMaxDist)
+        {
+            Speed = nextCar.Speed;
+        }
 
         float distToNextPoint = Vector3.Distance(transform.position, nextPoint);
 
@@ -62,15 +74,20 @@ public class Car : MonoBehaviour, IPauseable
         Vector3 moveVector = (nextPoint - transform.position).normalized * moveVectorLen;
         bool needToGiveWay = CheckGiveWay();
 
+        if(nextLaneable != null && DistanceToEndOfLane <= 4f)
+        {
+            if (!nextLaneable.HaveCars(this))
+                nextLaneable.AddCar(this);
+        }
+
         if (!needToGiveWay)
         {
             transform.Translate(moveVector, Space.World);
             transform.LookAt(transform.position + moveVector);
-            currentLane.ResetSpeed(currentPointIndex, 3, true);
         }
         else
         {
-            currentLane.SetSpeed(0, currentPointIndex, 3, true);
+            Speed = 0;
         }                                                                         
     }
 
@@ -84,12 +101,20 @@ public class Car : MonoBehaviour, IPauseable
 
         Crossroad crossroad = nextCrossroadPath.crossroad;
         if (crossroad.CrossroadType == CrossroadType.Regulated)
-            return CheckRegulatedGiveWay();
+            return CheckRegulatedGiveWay(crossroad);
 
         if (crossroad.HaveMainRoad)
-            return CheckMainRoadGiveWay();
+            return CheckMainRoadGiveWay(crossroad);
 
-        CrossroadPath rightCrossroadPath = nextCrossroadPath.crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+        return CheckNoMainRoadGiveWay(crossroad);
+    }
+
+    private bool CheckNoMainRoadGiveWay(Crossroad crossroad)
+    {
+        CrossroadPath rightCrossroadPath = crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+
+        if (crossroad.AllLinesBlocked() && (Road)currentLaneable == crossroad.RoadWithMinID())
+            return false;
 
         if (rightCrossroadPath.HaveCars())
             return true;
@@ -97,20 +122,36 @@ public class Car : MonoBehaviour, IPauseable
         return false;
     }
 
-    private bool CheckMainRoadGiveWay()
+    private bool CheckMainRoadGiveWay(Crossroad crossroad)
     {
-        throw new NotImplementedException();
+        CrossroadPath firstMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[0]].crossroadPath;
+        CrossroadPath secondMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[1]].crossroadPath;
+        CrossroadPath rightCrossroadPath = crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+
+
+        int carRoadNum = crossroad.GetCrossroadPathNum(nextCrossroadPath);
+        bool onMainRoad = carRoadNum == crossroad.MainRoadPointIndexes[0] || carRoadNum == crossroad.MainRoadPointIndexes[1];
+
+        if (!onMainRoad && (firstMainPath.HaveCars() || secondMainPath.HaveCars() || rightCrossroadPath.HaveCars()))
+            return true;
+
+        int rightRoadNum = crossroad.GetCrossroadPathNum(rightCrossroadPath);
+        bool isRightRoadMain = rightRoadNum == crossroad.MainRoadPointIndexes[0] || rightRoadNum == crossroad.MainRoadPointIndexes[1];
+
+        if (onMainRoad && isRightRoadMain && rightCrossroadPath.HaveCars())
+            return true;
+
+        return false;
     }
-           
-    private bool CheckRegulatedGiveWay()
+
+    private bool CheckRegulatedGiveWay(Crossroad crossroad)
     {
         throw new NotImplementedException();
     }
 
     private void OnDrawGizmosSelected()
     {
-        Debug.Log(Speed + " " + DistanceToEndOfLane + " " + nextCrossroadPath);
-        Helper.CreateCube(nextCrossroadPath.transform.position);
+        Debug.Log(Speed + " " + DistanceToEndOfLane + " |" + nextCar + " |" + distanceToNextCar);
     }
 
     int CalculateNextPointIndex()
@@ -127,20 +168,21 @@ public class Car : MonoBehaviour, IPauseable
                     nextCrossroadPath = null;
                 }
 
-                ILaneable nextLaneable = currentLaneable.GetNextLaneable(this);
+                nextLaneable = currentLaneable.GetNextLaneable(this);
                 if (nextLaneable != null)
                 {
                     if (nextLaneable.GetType() == typeof(Road))
                     {
                         Road road = (Road)nextLaneable;
-                        SnapPoint endSnapPoint = ((CrossroadPath)currentLaneable).GetEndSnapPoint(this);
+                        SnapPoint endSnapPoint = ((CrossroadPath)currentLaneable).GetCarEndSnapPoint(this);
                         nextCrossroadPath = endSnapPoint.startOfRoadConnected ? road.GetEndCrossroadPath() : road.GetStartCrossroadPath();
+                        //nextLaneable.AddCar(this);
                     }
 
-                    nextLaneable.AddCar(this);
+                   // nextLaneable.AddCar(this);
                     currentLane = nextLaneable.GetLane(this);
                 }
-
+                
                 currentLaneable.RemoveCar(this);
                 currentLaneable = nextLaneable;        
                

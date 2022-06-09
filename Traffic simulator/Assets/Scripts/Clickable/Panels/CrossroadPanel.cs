@@ -9,22 +9,54 @@ public class CrossroadPanel : Panel
     public GameObject mainRoadIndexes;
     public InputField mainRoadFirstIndexInpitField;
     public InputField mainRoadSecondIndexInpitField;
+    public GameObject RoadNumbers;
+    public Text RoadNumberText;
 
     Crossroad crossroad;
+    List<Text> roadNumbers;
+
     public override void FillSettings(Clickable clickable)
     {
         base.FillSettings(clickable);
         crossroad = (Crossroad)clickable;
 
         haveMainRoadToggle.isOn = crossroad.HaveMainRoad;
+        mainRoadIndexes.SetActive(haveMainRoadToggle.isOn);
         mainRoadFirstIndexInpitField.SetTextWithoutNotify(crossroad.MainRoadPointIndexes[0].ToString());
         mainRoadSecondIndexInpitField.SetTextWithoutNotify(crossroad.MainRoadPointIndexes[1].ToString());
+
+        UpdateRoadNumbers();
+    }
+
+
+    private void Update()
+    {
+        for (int i = 0; i < crossroad.SnapPoints.Length; i++)
+        {
+            roadNumbers[i].transform.position = Camera.main.WorldToScreenPoint(crossroad.SnapPoints[i].transform.position);
+        }
+    }
+
+    void UpdateRoadNumbers()
+    {
+        roadNumbers = new List<Text>(RoadNumbers.GetComponentsInChildren<Text>());
+
+        for (int i = 0; i < crossroad.SnapPoints.Length; i++)
+        {
+            if(i >= roadNumbers.Count)
+            {
+                roadNumbers.Add(Instantiate(RoadNumberText, RoadNumbers.transform));
+            }
+            roadNumbers[i].text = i.ToString();
+            roadNumbers[i].transform.position = Camera.main.WorldToScreenPoint(crossroad.SnapPoints[i].transform.position);
+        }
     }
 
     public void SetHaveMainRoad()
     {
         crossroad.SetHaveMainRoad(haveMainRoadToggle.isOn);
         mainRoadIndexes.SetActive(haveMainRoadToggle.isOn);
+        UpdateRoadNumbers();
     }
 
     public void SetMainRoadIndexes()

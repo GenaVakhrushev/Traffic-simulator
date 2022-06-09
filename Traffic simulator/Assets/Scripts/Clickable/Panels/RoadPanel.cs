@@ -10,7 +10,7 @@ public class RoadPanel : Panel
     public InputField DensityInputField;
 
     Road road;
-    Path path => road.path;
+    Path path => road.Path;
 
     float upadateInterval = 1f;
     public override void FillSettings(Clickable clickable)
@@ -33,22 +33,48 @@ public class RoadPanel : Panel
 
         LengthInputField.text = length.ToString();
         AvgSpeedInputField.text = AvgSpeed().ToString();
-        DensityInputField.text = (road.cars.Count / length).ToString();
+        DensityInputField.text = (CarsCount() / length).ToString();
 
         yield return new WaitForSeconds(upadateInterval);
         StartCoroutine(UpdateSettings());
     }
 
+    int CarsCount()
+    {
+        int count = 0;
+        foreach (Lane lane in road.StartLanes)
+        {
+            count += lane.NumCars;
+        }
+        foreach (Lane lane in road.EndLanes)
+        {
+            count += lane.NumCars;
+        }
+        return count;
+    }
+
     float AvgSpeed()
     {
-        if (road.cars.Count == 0)
+        int carsCount = CarsCount();
+        if (carsCount == 0)
             return 0;
 
         float speedSum = 0;
-        foreach(Car car in road.cars)
+        foreach (Lane lane in road.StartLanes)
         {
-            speedSum += car.Speed;
+            foreach (Car car in lane.Cars)
+            {
+                speedSum += car.Speed;
+            }
         }
-        return speedSum / road.cars.Count;
+        foreach (Lane lane in road.EndLanes)
+        {
+            foreach (Car car in lane.Cars)
+            {
+                speedSum += car.Speed;
+            }
+        }
+
+        return speedSum / carsCount;
     }
 }

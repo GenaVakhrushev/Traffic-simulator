@@ -23,11 +23,11 @@ public class SnapPoint : MonoBehaviour
         {
             if (startOfRoadConnected)
             {
-                connectedRoad.path.ConnectStartOrEndPoint(0, transform.position, connectedRoad.path.StartControlPointDir);
+                connectedRoad.Path.ConnectStartOrEndPoint(0, transform.position, connectedRoad.Path.StartControlPointDir);
             }
             else
             {
-                connectedRoad.path.ConnectStartOrEndPoint(connectedRoad.path.NumPoints - 1, transform.position, connectedRoad.path.EndControlPointDir);
+                connectedRoad.Path.ConnectStartOrEndPoint(connectedRoad.Path.NumPoints - 1, transform.position, connectedRoad.Path.EndControlPointDir);
             }
             connectedRoad.RoadDisplaing.UpdatePoints();
         }

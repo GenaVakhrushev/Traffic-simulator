@@ -12,7 +12,7 @@ public class RoadDisplaing : MonoBehaviour
     public Material ZTestMaterial;
 
     public Road road;
-    Path path => road.path;
+    Path path => road.Path;
 
     List<GameObject> pointsObjects;
     List<LineRenderer> linesFromPoints;

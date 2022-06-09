@@ -123,7 +123,7 @@ public class RoadEditor : MonoBehaviour
             else
             {
                 bool hitTerraint = Physics.Raycast(ray, out hit, 1000, LayerMask.GetMask("Terrain"));
-                if (!currentRoad.path.IsClosed && hitTerraint && Input.GetKey(KeyCode.LeftShift))
+                if (!currentRoad.Path.IsClosed && hitTerraint && Input.GetKey(KeyCode.LeftShift))
                 {
                     AddPoint(hit.point);
                 }
@@ -214,8 +214,8 @@ public class RoadEditor : MonoBehaviour
         Toggle isClosedToggle = RoadSettingsPanel.transform.GetChild(0).GetComponent<Toggle>();
         Toggle autosetControlPointsToggle = RoadSettingsPanel.transform.GetChild(1).GetComponent<Toggle>();
 
-        isClosedToggle.isOn = currentRoad.path.IsClosed;
-        autosetControlPointsToggle.isOn = currentRoad.path.AutoSetControlPoints;
+        isClosedToggle.isOn = currentRoad.Path.IsClosed;
+        autosetControlPointsToggle.isOn = currentRoad.Path.AutoSetControlPoints;
     }
 
     private void UnselectPreviousRoad()
@@ -261,7 +261,7 @@ public class RoadEditor : MonoBehaviour
         Vector3 newPosition = positionForMove;
 
         //прив€зывать можно только крайние точки
-        if (currentPointIndex == 0 || currentPointIndex == currentRoad.path.NumPoints - 1)
+        if (currentPointIndex == 0 || currentPointIndex == currentRoad.Path.NumPoints - 1)
         {
             Collider[] snapPoints = Physics.OverlapSphere(newPosition, snapRadius, LayerMask.GetMask("Snap point"));
 
@@ -283,20 +283,20 @@ public class RoadEditor : MonoBehaviour
                 Vector3 controlPointDir = snapPosition - snapPoints[closestPointIndex].transform.parent.position;
 
                 //если удалось подключить путь, то подключаем дорогу
-                if (currentRoad.path.ConnectStartOrEndPoint(currentPointIndex, snapPosition, controlPointDir))
+                if (currentRoad.Path.ConnectStartOrEndPoint(currentPointIndex, snapPosition, controlPointDir))
                 {
                     lastSnapPoint = snapPoints[closestPointIndex].GetComponent<SnapPoint>();
                     currentRoad.ConnectToSnapPoint(lastSnapPoint, currentPointIndex == 0);
                 }
                 else
                 {
-                    currentRoad.path.MovePoint(currentPointIndex, newPosition);
+                    currentRoad.Path.MovePoint(currentPointIndex, newPosition);
                 }
             }
             else
             {
-                bool needDisconnectStart = currentRoad.path.StartConnected && currentPointIndex == 0;
-                bool needDisconnectEnd = currentRoad.path.EndConnected && currentPointIndex == currentRoad.path.NumPoints - 1;
+                bool needDisconnectStart = currentRoad.Path.StartConnected && currentPointIndex == 0;
+                bool needDisconnectEnd = currentRoad.Path.EndConnected && currentPointIndex == currentRoad.Path.NumPoints - 1;
 
                 if (needDisconnectStart)
                 {
@@ -306,28 +306,28 @@ public class RoadEditor : MonoBehaviour
                     currentRoad.DisconnectSnapPoint(false);
                 }
                 
-                currentRoad.path.MovePoint(currentPointIndex, newPosition);
+                currentRoad.Path.MovePoint(currentPointIndex, newPosition);
             }
         }
         else
         {
-            currentRoad.path.MovePoint(currentPointIndex, newPosition);
+            currentRoad.Path.MovePoint(currentPointIndex, newPosition);
         }
         currentRoadDisplaing.UpdatePoints();
     }
 
     private void AddPoint(Vector3 point)
     {
-        currentRoad.path.AddSegment(point);
+        currentRoad.Path.AddSegment(point);
         currentRoadDisplaing.UpdatePoints();
     }
 
     private void DeletePoint(GameObject point)
     {
         int anchorIndex = currentRoadDisplaing.GetPointIndex(point);
-        if (currentRoad.path.DeleteSegment(anchorIndex))
+        if (currentRoad.Path.DeleteSegment(anchorIndex))
         {
-            if (currentRoad.path.NumSegments == 1)
+            if (currentRoad.Path.NumSegments == 1)
                 AutoSetControlPointsToggle.isOn = false;
             currentRoadDisplaing.DeletePoint(anchorIndex);
         }
@@ -336,7 +336,7 @@ public class RoadEditor : MonoBehaviour
 
     void SplitRoad(Vector3 point)
     {
-        currentRoad.path.SplitSegment(point, currentSelectedSegmentIndex);
+        currentRoad.Path.SplitSegment(point, currentSelectedSegmentIndex);
         currentRoadDisplaing.UpdatePoints();
     }
 
@@ -347,7 +347,7 @@ public class RoadEditor : MonoBehaviour
     {
         if (currentRoadDisplaing.SetIsOpen(toggle.isOn))
         {
-            currentRoad.path.IsClosed = toggle.isOn;
+            currentRoad.Path.IsClosed = toggle.isOn;
             currentRoadDisplaing.UpdatePoints();
         }
         else
@@ -358,12 +358,12 @@ public class RoadEditor : MonoBehaviour
 
     public void SetAutoSetControlPoints(Toggle toggle)
     {
-        if (currentRoad.path.NumSegments == 1 && toggle.isOn)
+        if (currentRoad.Path.NumSegments == 1 && toggle.isOn)
         {
             toggle.isOn = false;
             return;
         }
-        currentRoad.path.AutoSetControlPoints = toggle.isOn;
+        currentRoad.Path.AutoSetControlPoints = toggle.isOn;
         currentRoadDisplaing.UpdatePoints();
     }
 

@@ -38,7 +38,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         }
     }
 
-    public SnapPoint GetEndSnapPoint(Car car)
+    public SnapPoint GetCarEndSnapPoint(Car car)
     {
         return snapPoints[GetCarLaneIndex(car)];
     }
@@ -115,6 +115,11 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         int carLaneIndex = GetCarLaneIndex(car);
         carsByLanes[carLaneIndex].Remove(car);
     }
+
+    public bool HaveCars(Car car)
+    {
+        return GetCarLaneIndex(car) > -1;
+    }
     
     public int MinRoadId()
     {
@@ -136,6 +141,16 @@ public class CrossroadPath : MonoBehaviour, ILaneable
                 return true;
         }
         return false;
+    }
+
+    public int CarsCount()
+    {
+        int count = 0;
+        for (int i = 0; i < carsByLanes.Length; i++)
+        {
+            count += carsByLanes[i].Count;
+        }
+        return count;
     }
 
     private void OnDrawGizmosSelected()

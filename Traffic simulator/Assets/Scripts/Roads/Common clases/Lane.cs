@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Lane
 {
+    List<Car> cars = new List<Car>();
     List<LanePoint> lanePoints;
     float maxSpeed;
 
@@ -15,6 +16,10 @@ public class Lane
         }
     }
     public int NumPoints => lanePoints.Count;
+
+    public List<Car> Cars => cars;
+    public int NumCars => cars.Count;
+    public Car LastCar => NumCars > 0 ? cars[NumCars - 1] : null;
 
     delegate float Speed(int[] args);
 
@@ -100,6 +105,16 @@ public class Lane
     public void ResetSpeed(int index, float distance, bool fromStart)
     {
         ChangeSpeed((args) => maxSpeed, index, distance, fromStart);
+    }
+
+    public void AddCar(Car car)
+    {
+        cars.Add(car);
+    }
+
+    public void RemoveCar(Car car)
+    {
+        cars.Remove(car);
     }
 }
 

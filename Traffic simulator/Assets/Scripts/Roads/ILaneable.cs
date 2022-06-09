@@ -8,4 +8,5 @@ public interface ILaneable
     public ILaneable GetNextLaneable(Car car);
     public void AddCar(Car car);
     public void RemoveCar(Car car);
+    public bool HaveCars(Car car);
 }

@@ -24,10 +24,9 @@ public class RoadInfo
 
 public class Road : Clickable, ISaveable, ILaneable, IDeleteable
 {
-    public Path path;
-    public List<Car> cars;
-    public List<Lane> startLanes;
-    public List<Lane> endLanes;
+    Path path;
+    List<Lane> startLanes;
+    List<Lane> endLanes;
 
     SnapPoint startSnapPoint = null;
     SnapPoint endSnapPoint = null;
@@ -41,12 +40,15 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
     public CarSpawner StartCarSpawner;
     public CarSpawner EndCarSpawner;
 
+    public Path Path => path;
+    public List<Lane> StartLanes => startLanes;
+    public List<Lane> EndLanes => endLanes;
+
     void Awake()
     {
         path = new Path(transform.position);
         roadDisplaing = GetComponentInChildren<RoadDisplaing>();
 
-        cars = new List<Car>();
         startLanes = new List<Lane>();
         endLanes = new List<Lane>();
 
@@ -75,14 +77,14 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
             startSnapPoint.DisconnectRoad();
             startSnapPoint = null;
             StartCarSpawner.gameObject.SetActive(true);
-            path.DisconnectStartOrEndPoint(0);
+            Path.DisconnectStartOrEndPoint(0);
         }
         else
         {
             endSnapPoint.DisconnectRoad();
             endSnapPoint = null;
             EndCarSpawner.gameObject.SetActive(true);
-            path.DisconnectStartOrEndPoint(path.NumPoints - 1);
+            Path.DisconnectStartOrEndPoint(Path.NumPoints - 1);
         }
     }
 
@@ -96,7 +98,7 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         if(car.currentLaneable.GetType() == typeof(CrossroadPath))
         {
             CrossroadPath crossroadPath = (CrossroadPath)car.currentLaneable;
-            SnapPoint snapPoint = crossroadPath.GetEndSnapPoint(car);
+            SnapPoint snapPoint = crossroadPath.GetCarEndSnapPoint(car);
             if (snapPoint.connectedRoad)
                 return snapPoint.startOfRoadConnected ? snapPoint.connectedRoad.startLanes[0] : snapPoint.connectedRoad.endLanes[0];
         }
@@ -127,12 +129,34 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
 
     public void AddCar(Car car)
     {
-        cars.Add(car);
+        Lane lane = GetLane(car);
+        if (lane.NumCars > 0)
+            car.nextCar = lane.LastCar;
+
+        lane.AddCar(car);
     }
 
     public void RemoveCar(Car car)
     {
-        cars.Remove(car);
+        Lane lane = GetLane(car);
+        lane.RemoveCar(car);
+    }
+
+    public bool HaveCars(Car car)
+    {
+        for (int i = 0; i < startLanes.Count; i++)
+        {
+            if (startLanes[i].Cars.Contains(car))
+                return true;
+        }
+
+        for (int i = 0; i < endLanes.Count; i++)
+        {
+            if (endLanes[i].Cars.Contains(car))
+                return true;
+        }
+
+        return false;
     }
 
     public CrossroadPath GetStartCrossroadPath()
@@ -156,8 +180,8 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         startLanes.Clear();
         endLanes.Clear();
 
-        startLanes.Add(new Lane(path, true, RoadDisplaing.roadWidth * 0.2f, 60));
-        endLanes.Add(new Lane(path, false, RoadDisplaing.roadWidth * 0.2f, 60));
+        startLanes.Add(new Lane(Path, true, RoadDisplaing.roadWidth * 0.2f, 60));
+        endLanes.Add(new Lane(Path, false, RoadDisplaing.roadWidth * 0.2f, 60));
     }
 
     #region For saving
@@ -175,11 +199,11 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         roadDisplaing.UpdatePoints();
         roadDisplaing.HidePoints();
 
-        if (path.StartConnected && startSnapPoint == null)
+        if (Path.StartConnected && startSnapPoint == null)
         {
             StartCoroutine(LoadConnectStart());
         }
-        if(path.EndConnected && endSnapPoint == null)
+        if(Path.EndConnected && endSnapPoint == null)
         {
             StartCoroutine(LoadConnectEnd());
         }
@@ -192,7 +216,7 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         Collider[] snapPoints;
         while(true)
         {
-            snapPoints = Physics.OverlapSphere(path[0], 0.5f, LayerMask.GetMask("Snap point"));
+            snapPoints = Physics.OverlapSphere(Path[0], 0.5f, LayerMask.GetMask("Snap point"));
 
             if (snapPoints.Length > 0)
             {
@@ -210,7 +234,7 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         Collider[] snapPoints;
         while (true)
         {
-            snapPoints = Physics.OverlapSphere(path[path.NumPoints - 1], 0.5f, LayerMask.GetMask("Snap point"));
+            snapPoints = Physics.OverlapSphere(Path[Path.NumPoints - 1], 0.5f, LayerMask.GetMask("Snap point"));
 
             if (snapPoints.Length > 0)
             {
@@ -225,7 +249,7 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
 
     public byte[] SaveInfo()
     {
-        return Helper.ObjectToByteArray(new RoadInfo(path, StartCarSpawner, EndCarSpawner));
+        return Helper.ObjectToByteArray(new RoadInfo(Path, StartCarSpawner, EndCarSpawner));
     }
     #endregion
 
