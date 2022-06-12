@@ -21,6 +21,25 @@ public class Lane
     public int NumCars => cars.Count;
     public Car LastCar => NumCars > 0 ? cars[NumCars - 1] : null;
 
+    public float MaxSpeed
+    {
+        get
+        {
+            return maxSpeed;
+        }
+        set
+        {
+            if(maxSpeed != value)
+            {
+                maxSpeed = value;
+                foreach (LanePoint lanePoint in lanePoints)
+                {
+                    lanePoint.maxSpeed = maxSpeed;
+                }
+            }
+        }
+    }
+
     delegate float Speed(int[] args);
 
     public Lane(Path path, bool fromStartToEnd, float offset, float maxSpeed)
@@ -63,7 +82,7 @@ public class Lane
                 right = new Vector3(forward.z, forward.y, -forward.x);
             }
             
-            lanePoints.Add(new LanePoint { position = point + right, speed = maxSpeed, maxSpeed = maxSpeed });
+            lanePoints.Add(new LanePoint { position = point + right, maxSpeed = maxSpeed });
         }
         if (!fromStartToEnd)
             lanePoints.Reverse();
@@ -78,8 +97,7 @@ public class Lane
         {
             if (i >= 0 && i < NumPoints)
             {
-                lanePoints[i].speed = speed.Invoke(new int[] { i, startIndex});
-                //Debug.Log(lanePoints[i].speed);
+                lanePoints[i].maxSpeed = speed.Invoke(new int[] { i, startIndex});
             }
         }
     }
@@ -121,6 +139,5 @@ public class Lane
 public class LanePoint
 {
     public Vector3 position;
-    public float speed;
     public float maxSpeed;
 }

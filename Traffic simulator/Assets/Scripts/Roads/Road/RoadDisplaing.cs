@@ -40,9 +40,9 @@ public class RoadDisplaing : MonoBehaviour
         meshCollider = GetComponent<MeshCollider>();
 
         road.StartCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[0], Quaternion.identity, transform).GetComponent<CarSpawner>();
-        road.StartCarSpawner.onStart = true;
+        road.StartCarSpawner.OnStart = true;
         road.EndCarSpawner = Instantiate(Prefabs.Instance.CarSpawner, path[path.NumPoints - 1], Quaternion.identity, transform).GetComponent<CarSpawner>();
-        road.EndCarSpawner.onStart = false;
+        road.EndCarSpawner.OnStart = false;
 
         UpdatePoints();
     }

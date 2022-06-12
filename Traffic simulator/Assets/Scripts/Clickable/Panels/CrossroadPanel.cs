@@ -9,6 +9,7 @@ public class CrossroadPanel : Panel
     public GameObject mainRoadIndexes;
     public InputField mainRoadFirstIndexInpitField;
     public InputField mainRoadSecondIndexInpitField;
+
     public GameObject RoadNumbers;
     public Text RoadNumberText;
 
@@ -31,6 +32,11 @@ public class CrossroadPanel : Panel
 
     private void Update()
     {
+        UpdateRoadTextsPositions();
+    }
+
+    void UpdateRoadTextsPositions()
+    {
         for (int i = 0; i < crossroad.SnapPoints.Length; i++)
         {
             roadNumbers[i].transform.position = Camera.main.WorldToScreenPoint(crossroad.SnapPoints[i].transform.position);
@@ -48,8 +54,8 @@ public class CrossroadPanel : Panel
                 roadNumbers.Add(Instantiate(RoadNumberText, RoadNumbers.transform));
             }
             roadNumbers[i].text = i.ToString();
-            roadNumbers[i].transform.position = Camera.main.WorldToScreenPoint(crossroad.SnapPoints[i].transform.position);
         }
+        UpdateRoadTextsPositions();
     }
 
     public void SetHaveMainRoad()
@@ -69,8 +75,10 @@ public class CrossroadPanel : Panel
 
         if (firstIndex < 0 || firstIndex >= crossroad.SnapPoints.Length || secondIndex < 0 || secondIndex >= crossroad.SnapPoints.Length || firstIndex == secondIndex)
         {
-            mainRoadFirstIndexInpitField.SetTextWithoutNotify(crossroad.MainRoadPointIndexes[0].ToString());
-            mainRoadSecondIndexInpitField.SetTextWithoutNotify(crossroad.MainRoadPointIndexes[1].ToString());
+            // mainRoadFirstIndexInpitField.SetTextWithoutNotify(crossroad.MainRoadPointIndexes[0].ToString());
+            // mainRoadSecondIndexInpitField.SetTextWithoutNotify(crossroad.MainRoadPointIndexes[1].ToString());
+            mainRoadFirstIndexInpitField.text = crossroad.MainRoadPointIndexes[0].ToString();
+            mainRoadSecondIndexInpitField.text = crossroad.MainRoadPointIndexes[1].ToString();
             return;
         }
 

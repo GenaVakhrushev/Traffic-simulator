@@ -16,7 +16,7 @@ public class Car : MonoBehaviour, IPauseable
     float carsMaxDist = 3f;
 
     public float Speed = 60f;
-    float acceleration => 2.5f * Time.deltaTime;
+    float acceleration => 10f * Time.deltaTime;
     float moveVectorLen => Speed / 3.6f * Time.deltaTime;
 
     float roadComplitionPercent = 0;
@@ -47,8 +47,8 @@ public class Car : MonoBehaviour, IPauseable
             return;
         
         Speed += acceleration;
-        if (Speed > currentLane[currentPointIndex].speed)
-            Speed = currentLane[currentPointIndex].speed;
+        if (Speed > currentLane[currentPointIndex].maxSpeed)
+            Speed = currentLane[currentPointIndex].maxSpeed;
 
         if (nextCar != null && distanceToNextCar < carsMaxDist)
         {
@@ -151,7 +151,14 @@ public class Car : MonoBehaviour, IPauseable
 
     private void OnDrawGizmosSelected()
     {
-        Debug.Log(Speed + " " + DistanceToEndOfLane + " |" + nextCar + " |" + distanceToNextCar);
+        Crossroad crossroad = nextCrossroadPath.crossroad;
+        CrossroadPath firstMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[0]].crossroadPath;
+        CrossroadPath secondMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[1]].crossroadPath;
+        CrossroadPath rightCrossroadPath = crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+        int carRoadNum = crossroad.GetCrossroadPathNum(nextCrossroadPath);
+        bool onMainRoad = carRoadNum == crossroad.MainRoadPointIndexes[0] || carRoadNum == crossroad.MainRoadPointIndexes[1];
+
+        Debug.Log(Speed + " " + CheckMainRoadGiveWay(crossroad) + " |" + firstMainPath.HaveCars() + " " + secondMainPath.HaveCars() + " |" + onMainRoad);
     }
 
     int CalculateNextPointIndex()

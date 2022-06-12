@@ -82,10 +82,6 @@ public class SavingSystem : MonoBehaviour
                     Destroy(savedObject);
             }
         }
-        else
-        {
-            Debug.LogError("Save file not found in " + path);
-        }
     }
 }
 

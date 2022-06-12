@@ -7,13 +7,20 @@ public class CarSpawnerPanel : Panel
 {
     public Toggle IsActiveToggle;
     public Dropdown CarTypeDropdown;
+
     public Dropdown IntervalTypeDropdown;
     public InputField IntervalTimeInputField;
     public InputField IntervalStartInputField;
     public InputField IntervalEndInputField;
-
     public GameObject FixedInterval;
     public GameObject RandomInterval;
+
+    public Dropdown StartSpeedIntervalTypeDropdown;
+    public InputField FixedSpeedInputField;
+    public InputField FromSpeedInputField;
+    public InputField ToSpeedInputField;
+    public GameObject FixedSpeed;
+    public GameObject RandomSpeed;
 
     CarSpawner carSpawner;
 
@@ -38,6 +45,21 @@ public class CarSpawnerPanel : Panel
         IntervalTimeInputField.text = carSpawner.SpawnDeltaTime.ToString();
         IntervalStartInputField.text = carSpawner.IntervalStart.ToString();
         IntervalEndInputField.text = carSpawner.IntervalEnd.ToString();
+
+        if (carSpawner.StartSpeedIntervalType == IntervalType.Fixed)
+        {
+            FixedSpeed.SetActive(true);
+            RandomSpeed.SetActive(false);
+        }
+        else
+        {
+            FixedSpeed.SetActive(false);
+            RandomSpeed.SetActive(true);
+        }
+        StartSpeedIntervalTypeDropdown.value = (int)carSpawner.StartSpeedIntervalType;
+        FixedSpeedInputField.text = carSpawner.FixedStartSpeed.ToString();
+        FromSpeedInputField.text = carSpawner.FromStartSpeed.ToString();
+        ToSpeedInputField.text = carSpawner.ToStartSpeed.ToString();
     }
 
     public void SetIsActive()
@@ -89,4 +111,38 @@ public class CarSpawnerPanel : Panel
     {
         carSpawner.IntervalEnd = float.Parse(IntervalEndInputField.text);
     } 
+
+    public void SetStartSpeedIntervalType()
+    {
+        if (carSpawner.StartSpeedIntervalType == (IntervalType)StartSpeedIntervalTypeDropdown.value)
+            return;
+
+        carSpawner.StartSpeedIntervalType = (IntervalType)StartSpeedIntervalTypeDropdown.value;
+
+        if (carSpawner.StartSpeedIntervalType == IntervalType.Fixed)
+        {
+            FixedSpeed.SetActive(true);
+            RandomSpeed.SetActive(false);
+        }
+        else
+        {
+            FixedSpeed.SetActive(false);
+            RandomSpeed.SetActive(true);
+        }
+    }
+
+    public void SetFixedSpeed()
+    {
+        carSpawner.FixedStartSpeed = float.Parse(FixedSpeedInputField.text);
+    }
+
+    public void SetRandomFromSpeed()
+    {
+        carSpawner.FromStartSpeed = float.Parse(FromSpeedInputField.text);
+    }
+
+    public void SetRandomToSpeed()
+    {
+        carSpawner.ToStartSpeed = float.Parse(ToSpeedInputField.text);
+    }
 }

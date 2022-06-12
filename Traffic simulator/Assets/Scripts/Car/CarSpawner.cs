@@ -15,6 +15,10 @@ public class CarSpawnerInfo
     public float intervalEnd;
     public bool isActive;
     public bool onStart;
+    public IntervalType startSpeedIntervalType;
+    public float fixedStartSpeed;
+    public float fromStartSpeed;
+    public float toStartSpeed;
 
     public CarSpawnerInfo(CarSpawner carSpawner)
     {
@@ -24,14 +28,32 @@ public class CarSpawnerInfo
         intervalStart = carSpawner.IntervalStart;
         intervalEnd = carSpawner.IntervalEnd;
         isActive = carSpawner.IsActive;
-        onStart = carSpawner.onStart;
+        onStart = carSpawner.OnStart;
+        startSpeedIntervalType = carSpawner.StartSpeedIntervalType;
+        fixedStartSpeed = carSpawner.FixedStartSpeed;
+        fromStartSpeed = carSpawner.FromStartSpeed;
+        toStartSpeed = carSpawner.ToStartSpeed;
     }
 }
 
 public class CarSpawner : Clickable, IPauseable
 {
+    float spawnDeltaTime = 4f;
+    bool isActive = true;
+
     public CarType CarType = CarType.Passenger;
     public IntervalType IntervalType = IntervalType.Fixed;
+    public IntervalType StartSpeedIntervalType = IntervalType.Fixed;
+
+    [HideInInspector] public bool OnStart;
+
+    [HideInInspector] public float IntervalStart;
+    [HideInInspector] public float IntervalEnd;
+    
+    [HideInInspector] public float FixedStartSpeed = 60;
+    [HideInInspector] public float FromStartSpeed = 60;
+    [HideInInspector] public float ToStartSpeed = 60;
+
     public float SpawnDeltaTime
     {
         get
@@ -45,10 +67,6 @@ public class CarSpawner : Clickable, IPauseable
                 StartSpawn();
         }
     }
-    [HideInInspector]
-    public float IntervalStart;
-    [HideInInspector]
-    public float IntervalEnd;
     public bool IsActive
     {
         get
@@ -75,11 +93,6 @@ public class CarSpawner : Clickable, IPauseable
             }
         }
     }
-
-    float spawnDeltaTime = 4f;
-    bool isActive = true;
-    [HideInInspector]
-    public bool onStart;
 
     Road road;
 
@@ -114,7 +127,11 @@ public class CarSpawner : Clickable, IPauseable
     {
         Car newCar = Instantiate(Prefabs.Instance.Car, transform.position, Quaternion.identity).GetComponent<Car>();
         newCar.currentLaneable = road;
-        newCar.currentLane = onStart ? road.StartLanes[0] : road.EndLanes[0];
+        newCar.currentLane = OnStart ? road.StartLanes[0] : road.EndLanes[0];
+        if (StartSpeedIntervalType == IntervalType.Fixed)
+            newCar.Speed = FixedStartSpeed;
+        else
+            newCar.Speed = Random.Range(FromStartSpeed, ToStartSpeed);
         road.AddCar(newCar);
         if (IntervalType == IntervalType.Fixed)
             yield return new WaitForSeconds(SpawnDeltaTime);
@@ -148,6 +165,10 @@ public class CarSpawner : Clickable, IPauseable
         IntervalStart = carSpawnerInfo.intervalStart;
         IntervalEnd = carSpawnerInfo.intervalEnd;
         IsActive = carSpawnerInfo.isActive;
-        //onStart = carSpawnerInfo.onStart;
+        OnStart = carSpawnerInfo.onStart;
+        StartSpeedIntervalType = carSpawnerInfo.startSpeedIntervalType;
+        FixedStartSpeed = carSpawnerInfo.fixedStartSpeed;
+        FromStartSpeed = carSpawnerInfo.fromStartSpeed;
+        ToStartSpeed = carSpawnerInfo.toStartSpeed;
     }
 }

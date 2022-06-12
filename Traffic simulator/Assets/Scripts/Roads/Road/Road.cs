@@ -9,16 +9,32 @@ public class RoadInfo
     PathInfo pathInfo;
     CarSpawnerInfo startCarSpawnerInfo;
     CarSpawnerInfo endCarSpawnerInfo;
+    float[] startMaxSpeeds;
+    float[] endMaxSpeeds;
 
     public PathInfo PathInfo => pathInfo;
     public CarSpawnerInfo StartCarSpawnerInfo => startCarSpawnerInfo;
     public CarSpawnerInfo EndCarSpawnerInfo => endCarSpawnerInfo;
+    public float[] StartMaxSpeeds => startMaxSpeeds;
+    public float[] EndMaxSpeeds => endMaxSpeeds;
 
-    public RoadInfo(Path path, CarSpawner startCarSpawner, CarSpawner endCarSpawner)
+    public RoadInfo(Road road)
     {
-        pathInfo = new PathInfo(path);
-        startCarSpawnerInfo = new CarSpawnerInfo(startCarSpawner);
-        endCarSpawnerInfo = new CarSpawnerInfo(endCarSpawner);
+        pathInfo = new PathInfo(road.Path);
+        startCarSpawnerInfo = new CarSpawnerInfo(road.StartCarSpawner);
+        endCarSpawnerInfo = new CarSpawnerInfo(road.EndCarSpawner);
+        List<float> speeds = new List<float>();
+        foreach (Lane lane in road.StartLanes)
+        {
+            speeds.Add(lane.MaxSpeed);
+        }
+        startMaxSpeeds = speeds.ToArray();
+        speeds.Clear();
+        foreach (Lane lane in road.EndLanes)
+        {
+            speeds.Add(lane.MaxSpeed);
+        }
+        endMaxSpeeds = speeds.ToArray();
     }
 }
 
@@ -209,6 +225,15 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         }
 
         UpdateLanes();
+
+        for (int i = 0; i < startLanes.Count; i++)
+        {
+            startLanes[i].MaxSpeed = roadInfo.StartMaxSpeeds[i];
+        }
+        for (int i = 0; i < endLanes.Count; i++)
+        {
+            endLanes[i].MaxSpeed = roadInfo.EndMaxSpeeds[i];
+        }
     }
 
     IEnumerator LoadConnectStart()
@@ -249,7 +274,7 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
 
     public byte[] SaveInfo()
     {
-        return Helper.ObjectToByteArray(new RoadInfo(Path, StartCarSpawner, EndCarSpawner));
+        return Helper.ObjectToByteArray(new RoadInfo(this));
     }
     #endregion
 

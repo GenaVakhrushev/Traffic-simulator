@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class RoadEditor : MonoBehaviour
 {
@@ -59,8 +60,8 @@ public class RoadEditor : MonoBehaviour
     private void Update()
     {
         //проверка на нажатие на UI
-        bool isOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
-
+        bool isOverUI = EventSystem.current.IsPointerOverGameObject();
+        
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
