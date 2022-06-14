@@ -120,7 +120,8 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
         Destroy(gameObject);
         for (int i = 0; i < snapPoints.Length; i++)
         {
-            snapPoints[i].connectedRoad.DisconnectSnapPoint(snapPoints[i].startOfRoadConnected);
+            if (snapPoints[i].connectedRoad)
+                snapPoints[i].connectedRoad.DisconnectSnapPoint(snapPoints[i].startOfRoadConnected);
         }
     }
 
