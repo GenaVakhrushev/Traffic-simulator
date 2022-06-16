@@ -108,6 +108,8 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         Lane newLane = GetRandomLane();
         int newLaneIndex = lanes.IndexOf(newLane);
         carsByLanes[newLaneIndex].Add(car);
+
+        car.direction = (Direction)newLaneIndex;
     }
 
     public void RemoveCar(Car car)
@@ -116,7 +118,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         carsByLanes[carLaneIndex].Remove(car);
     }
 
-    public bool HaveCars(Car car)
+    public bool HaveCar(Car car)
     {
         return GetCarLaneIndex(car) > -1;
     }
@@ -143,6 +145,26 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         return false;
     }
 
+    public bool HaveCarsBack()
+    {
+        return carsByLanes[0].Count != 0;
+    }
+
+    public bool HaveCarsRight()
+    {
+        return carsByLanes[1].Count != 0;
+    }
+
+    public bool HaveCarsForfard()
+    {
+        return carsByLanes[2].Count != 0;
+    }
+
+    public bool HaveCarsLeft()
+    {
+        return carsByLanes[3].Count != 0;
+    }
+
     public int CarsCount()
     {
         int count = 0;
@@ -151,6 +173,14 @@ public class CrossroadPath : MonoBehaviour, ILaneable
             count += carsByLanes[i].Count;
         }
         return count;
+    }
+
+    public void ClearCarsByLanes()
+    {
+        for (int i = 0; i < carsByLanes.Length; i++)
+        {
+            carsByLanes[i].Clear();
+        }
     }
 
     private void OnDrawGizmosSelected()
@@ -167,9 +197,11 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         }
 
 #if UNITY_EDITOR
+        int i = 0;
         foreach (Path path in possiplePaths)
         {
-            Handles.DrawBezier(path[0], path[3], path[1], path[2], Color.red, null, 2f);
+            Handles.DrawBezier(path[0], path[3], path[1], path[2], Color.red, null, (i+ 1) * 2f);
+            i++;
         }
 #endif
     }

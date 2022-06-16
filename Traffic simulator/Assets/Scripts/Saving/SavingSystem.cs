@@ -53,6 +53,8 @@ public class SavingSystem : MonoBehaviour
 
         if (File.Exists(path))
         {
+            Clear.ClearScene();
+
             BinaryFormatter formatter = new BinaryFormatter();
             FileStream stream = new FileStream(path, FileMode.Open);
 

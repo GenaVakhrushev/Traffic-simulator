@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class SnapPoint : MonoBehaviour
 {
-    [HideInInspector]
-    public CrossroadPath crossroadPath;
-    [HideInInspector]
-    public Road connectedRoad;
-    [HideInInspector]
-    public bool startOfRoadConnected;
 
-    private void Start()
+    [HideInInspector] public CrossroadPath crossroadPath;
+    [HideInInspector] public TrafficLight trafficLight;
+    [HideInInspector] public Road connectedRoad;
+    [HideInInspector] public bool startOfRoadConnected;
+
+    private void Awake()
     {
         crossroadPath = GetComponentInChildren<CrossroadPath>();
+        trafficLight = GetComponentInChildren<TrafficLight>();
     }
 
     public void MoveConnectedRoad()

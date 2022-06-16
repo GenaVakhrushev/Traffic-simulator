@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Direction { Back, Right, Forward, Left }
+
 public class Car : MonoBehaviour, IPauseable
 {
     public ILaneable currentLaneable;
     public Lane currentLane;
+
+    public Direction direction;
 
     CrossroadPath nextCrossroadPath;
     ILaneable nextLaneable;
@@ -16,7 +20,7 @@ public class Car : MonoBehaviour, IPauseable
     float carsMaxDist = 3f;
 
     public float Speed = 60f;
-    float acceleration => 10f * Time.deltaTime;
+    float acceleration => 20f * Time.deltaTime;
     float moveVectorLen => Speed / 3.6f * Time.deltaTime;
 
     float roadComplitionPercent = 0;
@@ -76,7 +80,7 @@ public class Car : MonoBehaviour, IPauseable
 
         if(nextLaneable != null && DistanceToEndOfLane <= 4f)
         {
-            if (!nextLaneable.HaveCars(this))
+            if (!nextLaneable.HaveCar(this))
                 nextLaneable.AddCar(this);
         }
 
@@ -96,7 +100,7 @@ public class Car : MonoBehaviour, IPauseable
         if (nextCrossroadPath == null)
             return false;
 
-        if (DistanceToEndOfLane > 1.5f)
+        if (DistanceToEndOfLane > 0.5f)
             return false;
 
         Crossroad crossroad = nextCrossroadPath.crossroad;
@@ -111,12 +115,16 @@ public class Car : MonoBehaviour, IPauseable
 
     private bool CheckNoMainRoadGiveWay(Crossroad crossroad)
     {
-        CrossroadPath rightCrossroadPath = crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+        CrossroadPath rightCrossroadPath = crossroad.GetRightCrossroadPath(nextCrossroadPath);
+        CrossroadPath forwardCrossroadPath = crossroad.GetForwardCrossroadPath(nextCrossroadPath);
 
         if (crossroad.AllLinesBlocked() && (Road)currentLaneable == crossroad.RoadWithMinID())
             return false;
 
-        if (rightCrossroadPath.HaveCars())
+        if (direction == Direction.Right && !rightCrossroadPath.HaveCarsBack())
+            return false;
+
+        if (rightCrossroadPath.HaveCars() || (forwardCrossroadPath.HaveCarsRight() || forwardCrossroadPath.HaveCarsForfard()) && (direction == Direction.Left || direction == Direction.Back))
             return true;
 
         return false;
@@ -126,7 +134,7 @@ public class Car : MonoBehaviour, IPauseable
     {
         CrossroadPath firstMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[0]].crossroadPath;
         CrossroadPath secondMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[1]].crossroadPath;
-        CrossroadPath rightCrossroadPath = crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+        CrossroadPath rightCrossroadPath = crossroad.GetRightCrossroadPath(nextCrossroadPath);
 
 
         int carRoadNum = crossroad.GetCrossroadPathNum(nextCrossroadPath);
@@ -154,7 +162,7 @@ public class Car : MonoBehaviour, IPauseable
         Crossroad crossroad = nextCrossroadPath.crossroad;
         CrossroadPath firstMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[0]].crossroadPath;
         CrossroadPath secondMainPath = crossroad.SnapPoints[crossroad.MainRoadPointIndexes[1]].crossroadPath;
-        CrossroadPath rightCrossroadPath = crossroad.GetRightSnapPoint(nextCrossroadPath.parentSpanPoint).crossroadPath;
+        CrossroadPath rightCrossroadPath = crossroad.GetRightCrossroadPath(nextCrossroadPath);
         int carRoadNum = crossroad.GetCrossroadPathNum(nextCrossroadPath);
         bool onMainRoad = carRoadNum == crossroad.MainRoadPointIndexes[0] || carRoadNum == crossroad.MainRoadPointIndexes[1];
 

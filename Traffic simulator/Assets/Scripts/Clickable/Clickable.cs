@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public abstract class Clickable : MonoBehaviour
 {
-    public Panel panel;
+    [HideInInspector] public Panel panel;
 
     public virtual void Start()
     {

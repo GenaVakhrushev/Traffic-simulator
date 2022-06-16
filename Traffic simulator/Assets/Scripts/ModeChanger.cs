@@ -65,6 +65,7 @@ public class ModeChanger : MonoBehaviour
 
         PlayPausePanel.SetActive(false);
         GameStateManager.Stop();
+        PanelsManager.HidePanels();
     }
 
     public void SetTerrainEditorMode()
@@ -83,6 +84,7 @@ public class ModeChanger : MonoBehaviour
 
         PlayPausePanel.SetActive(false);
         GameStateManager.Stop();
+        PanelsManager.HidePanels();
     }
 
     private void OnApplicationQuit()

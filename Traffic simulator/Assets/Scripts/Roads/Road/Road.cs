@@ -158,7 +158,7 @@ public class Road : Clickable, ISaveable, ILaneable, IDeleteable
         lane.RemoveCar(car);
     }
 
-    public bool HaveCars(Car car)
+    public bool HaveCar(Car car)
     {
         for (int i = 0; i < startLanes.Count; i++)
         {

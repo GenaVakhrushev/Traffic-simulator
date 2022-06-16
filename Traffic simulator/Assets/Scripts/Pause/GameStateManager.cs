@@ -42,6 +42,12 @@ public class GameStateManager : MonoBehaviour
         {
             pauseable.OnRestart();
         }
+
+        foreach (CrossroadPath crossroadPath in FindObjectsOfType<CrossroadPath>())
+        {
+            crossroadPath.ClearCarsByLanes();
+        }
+
         SetState(GameState.Pause);
     }
 }

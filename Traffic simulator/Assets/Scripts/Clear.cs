@@ -5,7 +5,7 @@ using System.Linq;
 
 public class Clear : MonoBehaviour
 {
-    public void ClearScene()
+    public static void ClearScene()
     {
         var deleteables = FindObjectsOfType<MonoBehaviour>().OfType<IDeleteable>();
         foreach (IDeleteable deleteable in deleteables)

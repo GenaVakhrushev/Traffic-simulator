@@ -10,11 +10,13 @@ public class CrossroadInfo
     bool haveMainRoad;
     int[] mainRoadPointIndexes;
     CrossroadType crossroadType;
+    TrafficLightInfo[] trafficLightInfos;
 
     public Vector3 Position => new Vector3(position[0], position[1], position[2]);
     public bool HaveMainRoad => haveMainRoad;
-    public CrossroadType CrossroadType => crossroadType;
     public int[] MainRoadPointIndexes => mainRoadPointIndexes;
+    public CrossroadType CrossroadType => crossroadType;
+    public TrafficLightInfo[] TrafficLightInfos => trafficLightInfos;
 
     public CrossroadInfo(Crossroad crossroad)
     {
@@ -25,6 +27,12 @@ public class CrossroadInfo
         haveMainRoad = crossroad.HaveMainRoad;
         crossroadType = crossroad.CrossroadType;
         mainRoadPointIndexes = crossroad.MainRoadPointIndexes;
+
+        trafficLightInfos = new TrafficLightInfo[crossroad.SnapPoints.Length];
+        for (int i = 0; i < crossroad.SnapPoints.Length; i++)
+        {
+            trafficLightInfos[i] = new TrafficLightInfo(crossroad.SnapPoints[i].trafficLight);
+        }
     }
 }
 
@@ -61,6 +69,7 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
         {
             snapPoint.MoveConnectedRoad();
         }
+        UpdateMainRoadDisplay();
     }
 
     public void UpdateCrossroadPaths()
@@ -87,8 +96,9 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
         SetMainRoad(crossroadInfo.MainRoadPointIndexes[0], crossroadInfo.MainRoadPointIndexes[1]);
         SetType(crossroadInfo.CrossroadType);
 
-        foreach(SnapPoint snapPoint in snapPoints)
+        for (int i = 0; i < snapPoints.Length; i++)
         {
+            SnapPoint snapPoint = snapPoints[i];
             Collider[] roadColliders = Physics.OverlapSphere(snapPoint.transform.position, 0.5f, LayerMask.GetMask("Road"));
             if (roadColliders.Length > 0)
             {
@@ -112,6 +122,7 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
                 
                 road.ConnectToSnapPoint(snapPoint, startConnecting);
             }
+            snapPoint.trafficLight.LoadInfo(crossroadInfo.TrafficLightInfos[i]);
         }
     }
     #endregion
@@ -125,14 +136,24 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
         }
     }
 
-    public SnapPoint GetRightSnapPoint(SnapPoint snapPoint)
+    public CrossroadPath GetRightCrossroadPath(CrossroadPath crossroadPath)
     {
+        SnapPoint snapPoint = crossroadPath.parentSpanPoint;
         for (int i = 0; i < snapPoints.Length; i++)
         {
-            if (snapPoint == snapPoints[i] && i < snapPoints.Length - 1)
-                return snapPoints[i + 1];
-            if (snapPoint == snapPoints[i] && i == snapPoints.Length - 1)
-                return snapPoints[0];
+            if (snapPoint == snapPoints[i])
+                return snapPoints[(i + 1) % snapPoints.Length].crossroadPath;
+        }
+        return null;
+    }
+
+    public CrossroadPath GetForwardCrossroadPath(CrossroadPath crossroadPath)
+    {
+        SnapPoint snapPoint = crossroadPath.parentSpanPoint;
+        for (int i = 0; i < snapPoints.Length; i++)
+        {
+            if (snapPoint == snapPoints[i])
+                return snapPoints[(i + 2) % snapPoints.Length].crossroadPath;
         }
         return null;
     }
