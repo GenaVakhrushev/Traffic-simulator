@@ -13,9 +13,10 @@ public class CrossroadPath : MonoBehaviour, ILaneable
     public Crossroad crossroad;
     public SnapPoint[] snapPoints;
 
-    public SnapPoint parentSpanPoint;
+    public SnapPoint parentSnapPoint;
+    int parentSnapPointIndex;
 
-   float spacing = 0.1f;
+    float spacing = 0.1f;
 
     public void Start()
     {
@@ -24,10 +25,12 @@ public class CrossroadPath : MonoBehaviour, ILaneable
 
         crossroad = GetComponentInParent<Crossroad>();
         snapPoints = crossroad.GetComponentsInChildren<SnapPoint>();
-        parentSpanPoint = GetComponentInParent<SnapPoint>();
+        parentSnapPoint = GetComponentInParent<SnapPoint>();
 
         for (int i = 0; i < snapPoints.Length; i++)
         {
+            if (snapPoints[i] == parentSnapPoint)
+                parentSnapPointIndex = i;
             CreatePath(snapPoints[i]);
         }
 
@@ -47,7 +50,7 @@ public class CrossroadPath : MonoBehaviour, ILaneable
     {
         Vector3 snapPointBezierPoint = point.transform.position + (point.transform.position - point.transform.GetChild(0).transform.position);
         Vector3[] points;
-        if (point != parentSpanPoint)
+        if (point != parentSnapPoint)
         {
             points = new Vector3[]
             {
@@ -108,8 +111,8 @@ public class CrossroadPath : MonoBehaviour, ILaneable
         Lane newLane = GetRandomLane();
         int newLaneIndex = lanes.IndexOf(newLane);
         carsByLanes[newLaneIndex].Add(car);
-
-        car.direction = (Direction)newLaneIndex;
+        
+        car.direction = (Direction)((newLaneIndex - parentSnapPointIndex + snapPoints.Length) % snapPoints.Length);
     }
 
     public void RemoveCar(Car car)
@@ -147,22 +150,22 @@ public class CrossroadPath : MonoBehaviour, ILaneable
 
     public bool HaveCarsBack()
     {
-        return carsByLanes[0].Count != 0;
+        return carsByLanes[parentSnapPointIndex].Count != 0;
     }
 
     public bool HaveCarsRight()
     {
-        return carsByLanes[1].Count != 0;
+        return carsByLanes[(parentSnapPointIndex + 1) % snapPoints.Length].Count != 0;
     }
 
     public bool HaveCarsForfard()
     {
-        return carsByLanes[2].Count != 0;
+        return carsByLanes[(parentSnapPointIndex + 2) % snapPoints.Length].Count != 0;
     }
 
     public bool HaveCarsLeft()
     {
-        return carsByLanes[3].Count != 0;
+        return carsByLanes[(parentSnapPointIndex + 3) % snapPoints.Length].Count != 0;
     }
 
     public int CarsCount()
@@ -189,19 +192,19 @@ public class CrossroadPath : MonoBehaviour, ILaneable
 
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(transform.position, 0.15f);
-
+        int i = 0;
         Gizmos.color = Color.blue;
         foreach (SnapPoint snapPoint in snapPoints)
         {
-            Gizmos.DrawSphere(snapPoint.transform.position + (snapPoint.transform.position - snapPoint.transform.GetChild(0).transform.position), 0.1f);
+            Gizmos.DrawSphere(snapPoint.transform.position + (snapPoint.transform.position - snapPoint.transform.GetChild(0).transform.position), (i + 1) * 0.1f);
+            i++;
         }
 
 #if UNITY_EDITOR
-        int i = 0;
+        
         foreach (Path path in possiplePaths)
         {
             Handles.DrawBezier(path[0], path[3], path[1], path[2], Color.red, null, (i+ 1) * 2f);
-            i++;
         }
 #endif
     }

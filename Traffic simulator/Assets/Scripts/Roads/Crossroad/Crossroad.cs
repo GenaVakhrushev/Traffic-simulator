@@ -138,7 +138,7 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
 
     public CrossroadPath GetRightCrossroadPath(CrossroadPath crossroadPath)
     {
-        SnapPoint snapPoint = crossroadPath.parentSpanPoint;
+        SnapPoint snapPoint = crossroadPath.parentSnapPoint;
         for (int i = 0; i < snapPoints.Length; i++)
         {
             if (snapPoint == snapPoints[i])
@@ -149,7 +149,7 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
 
     public CrossroadPath GetForwardCrossroadPath(CrossroadPath crossroadPath)
     {
-        SnapPoint snapPoint = crossroadPath.parentSpanPoint;
+        SnapPoint snapPoint = crossroadPath.parentSnapPoint;
         for (int i = 0; i < snapPoints.Length; i++)
         {
             if (snapPoint == snapPoints[i])

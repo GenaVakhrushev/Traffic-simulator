@@ -58,7 +58,7 @@ public class TrafficLight : Clickable, IPauseable
 
     public void OnGameStateChanged(GameState gameState)
     {
-        if (gameState == GameState.Play)
+        if (gameState == GameState.Play && gameObject.activeSelf)
         {
             StartCoroutine(ChangeColor());
         }

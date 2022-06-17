@@ -124,7 +124,9 @@ public class Car : MonoBehaviour, IPauseable
         if (direction == Direction.Right && !rightCrossroadPath.HaveCarsBack())
             return false;
 
-        if (rightCrossroadPath.HaveCars() || (forwardCrossroadPath.HaveCarsRight() || forwardCrossroadPath.HaveCarsForfard()) && (direction == Direction.Left || direction == Direction.Back))
+        bool giveWayToForwardCars = (forwardCrossroadPath.HaveCarsRight() || forwardCrossroadPath.HaveCarsForfard()) && (direction == Direction.Left || direction == Direction.Back);
+
+        if (rightCrossroadPath.HaveCars() || giveWayToForwardCars)
             return true;
 
         return false;
@@ -154,7 +156,7 @@ public class Car : MonoBehaviour, IPauseable
 
     private bool CheckRegulatedGiveWay(Crossroad crossroad)
     {
-        TrafficLight trafficLight = nextCrossroadPath.parentSpanPoint.trafficLight;
+        TrafficLight trafficLight = nextCrossroadPath.parentSnapPoint.trafficLight;
 
         if (trafficLight.LightColor != Color.green)
             return true;
