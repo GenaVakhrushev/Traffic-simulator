@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class CrossroadPanel : Panel
 {
+    public Toggle regulatedCrossroadToggle;
     public Toggle haveMainRoadToggle;
     public GameObject mainRoadIndexes;
     public InputField mainRoadFirstIndexInpitField;
@@ -21,6 +22,7 @@ public class CrossroadPanel : Panel
         base.FillSettings(clickable);
         crossroad = (Crossroad)clickable;
 
+        regulatedCrossroadToggle.isOn = crossroad.CrossroadType == CrossroadType.Regulated;
         haveMainRoadToggle.isOn = crossroad.HaveMainRoad;
         mainRoadIndexes.SetActive(haveMainRoadToggle.isOn);
         mainRoadFirstIndexInpitField.SetTextWithoutNotify(crossroad.MainRoadPointIndexes[0].ToString());
@@ -56,6 +58,11 @@ public class CrossroadPanel : Panel
             roadNumbers[i].text = i.ToString();
         }
         UpdateRoadTextsPositions();
+    }
+
+    public void SetCrossroadType()
+    {
+        crossroad.SetCrossroadType(regulatedCrossroadToggle.isOn);
     }
 
     public void SetHaveMainRoad()

@@ -44,14 +44,14 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
     int[] mainRoadPointIndexes = new int[2];
     CrossroadType crossroadType = CrossroadType.Unregulated;
 
-    public CrossroadType CrossroadType => crossroadType;
-    public bool HaveMainRoad => haveMainRoad;
-    public int[] MainRoadPointIndexes => mainRoadPointIndexes;
-    public SnapPoint[] SnapPoints => snapPoints;
-
     SnapPoint[] snapPoints;
 
     LineRenderer lineRenderer;
+
+    public bool HaveMainRoad => haveMainRoad;
+    public int[] MainRoadPointIndexes => mainRoadPointIndexes;
+    public CrossroadType CrossroadType => crossroadType;
+    public SnapPoint[] SnapPoints => snapPoints;
 
     void Awake()
     {
@@ -94,7 +94,7 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
 
         SetHaveMainRoad(crossroadInfo.HaveMainRoad);
         SetMainRoad(crossroadInfo.MainRoadPointIndexes[0], crossroadInfo.MainRoadPointIndexes[1]);
-        SetType(crossroadInfo.CrossroadType);
+        SetCrossroadType(crossroadInfo.CrossroadType);
 
         for (int i = 0; i < snapPoints.Length; i++)
         {
@@ -200,6 +200,20 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
         return -1;
     }
 
+    public void SetCrossroadType(CrossroadType crossroadType)
+    {
+        SetCrossroadType(crossroadType == CrossroadType.Regulated);
+    }
+
+    public void SetCrossroadType(bool regulated)
+    {
+        crossroadType = regulated ? CrossroadType.Regulated : CrossroadType.Unregulated;
+        foreach (SnapPoint snapPoint in snapPoints)
+        {
+            snapPoint.trafficLight.gameObject.SetActive(regulated);
+        }
+    }
+
     public void SetHaveMainRoad(bool value)
     {
         haveMainRoad = value;
@@ -230,10 +244,5 @@ public class Crossroad : Clickable, ISaveable, IDeleteable
 
         lineRenderer.positionCount = points.Length;
         lineRenderer.SetPositions(points);
-    }
-
-    public void SetType(CrossroadType crossroadType)
-    {
-        this.crossroadType = crossroadType;
     }
 }
