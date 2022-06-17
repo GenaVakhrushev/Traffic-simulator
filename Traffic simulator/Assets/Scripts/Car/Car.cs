@@ -154,7 +154,12 @@ public class Car : MonoBehaviour, IPauseable
 
     private bool CheckRegulatedGiveWay(Crossroad crossroad)
     {
-        throw new NotImplementedException();
+        TrafficLight trafficLight = nextCrossroadPath.parentSpanPoint.trafficLight;
+
+        if (trafficLight.LightColor != Color.green)
+            return true;
+
+        return false;
     }
 
     private void OnDrawGizmosSelected()
