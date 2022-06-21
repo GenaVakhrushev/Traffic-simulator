@@ -77,11 +77,13 @@ public class Car : MonoBehaviour, IPauseable
         }
         Vector3 moveVector = (nextPoint - transform.position).normalized * moveVectorLen;
         bool needToGiveWay = CheckGiveWay();
-
+        
         if(nextLaneable != null && DistanceToEndOfLane <= 4f)
         {
             if (!nextLaneable.HaveCar(this))
+            {
                 nextLaneable.AddCar(this);
+            }
         }
 
         if (!needToGiveWay)
@@ -190,7 +192,7 @@ public class Car : MonoBehaviour, IPauseable
                     nextCrossroadPath = null;
                 }
 
-                nextLaneable = currentLaneable.GetNextLaneable(this);
+                //nextLaneable = currentLaneable.GetNextLaneable(this);
                 if (nextLaneable != null)
                 {
                     if (nextLaneable.GetType() == typeof(Road))
@@ -206,14 +208,16 @@ public class Car : MonoBehaviour, IPauseable
                 }
                 
                 currentLaneable.RemoveCar(this);
-                currentLaneable = nextLaneable;        
-               
+                currentLaneable = nextLaneable;
+
                 //если дальше некуда идти, то уничтожить машину, иначе перейти к следующему участку дороги
                 if (currentLaneable == null)
                 {
                     Destroy(gameObject);
                     return -1;
                 }
+
+                nextLaneable = currentLaneable.GetNextLaneable(this);
 
                 roadComplitionPercent = 0;
                 currentPointIndex = 0;
